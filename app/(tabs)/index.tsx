@@ -4,6 +4,7 @@ import { Calendar, Plus } from 'lucide-react-native';
 import { useDates } from '@/contexts/DateContext';
 import { DateList } from '@/components/DateList';
 import { AddDateModal } from '@/components/AddDateModal';
+import { APP_NAME } from '@/constant/text';
 
 export default function HomeScreen() {
   const [isModalVisible, setIsModalVisible] = useState(false);
@@ -16,7 +17,7 @@ export default function HomeScreen() {
         <View style={styles.header}>
           <View style={styles.headerContent}>
             <View style={styles.headerText}>
-              <Text style={styles.title}>My Dates</Text>
+              <Text style={styles.title}>{APP_NAME}</Text>
               <Text style={styles.subtitle}>
                 {dates.length} {dates.length === 1 ? 'date' : 'dates'} tracked
               </Text>
