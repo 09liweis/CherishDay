@@ -41,7 +41,7 @@ export function DateProvider({ children }: { children: ReactNode }) {
     try {
       const storedDates = await AsyncStorage.getItem(STORAGE_KEY);
       if (storedDates) {
-        const parsedDates = JSON.parse(storedDates).map((date: any) => ({
+        const parsedDates = JSON.parse(storedDates).map((date: TrackedDate) => ({
           ...date,
           date: new Date(date.date),
           createdAt: new Date(date.createdAt),
@@ -73,7 +73,7 @@ export function DateProvider({ children }: { children: ReactNode }) {
   const removeDate = (id: string) => {
     setDates(prevDates => prevDates.filter(date => date.id !== id));
     // If no dates left, clear storage
-    if (dates.length === 1) {
+    if (dates.length === 0) {
       AsyncStorage.removeItem(STORAGE_KEY);
     }
   };
