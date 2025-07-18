@@ -36,7 +36,6 @@ export function DatePicker({ date, onDateChange }: DatePickerProps) {
           value={date.toISOString().split('T')[0]}
           onChange={(e) => onDateChange(new Date(e.target.value + 'T00:00:00'))}
           style={{
-            width: '100%',
             border: '1px solid #d1d5db',
             borderRadius: '8px',
             padding: '12px 16px',
