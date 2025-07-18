@@ -82,7 +82,7 @@ export function DateCard({ date, onDelete }: DateCardProps) {
             <View style={styles.durationContainer}>
               <Cake size={14} color="#64748b" />
               <Text style={styles.durationText}>
-                {getYearsDuration(new Date(date.date))} year{getYearsDuration(new Date(date.date)) !== 1 ? 's' : ''} duration
+                {getYearsDuration(new Date(date.date))}
               </Text>
             </View>
           )}
@@ -135,7 +135,7 @@ function getDaysUntil(date: Date): number {
   return Math.ceil(diffTime / (1000 * 60 * 60 * 24));
 }
 
-function getYearsDuration(originalDate: Date): number {
+function getYearsDuration(originalDate: Date): string {
   const now = new Date();
   let years = now.getFullYear() - originalDate.getFullYear();
   
@@ -146,8 +146,9 @@ function getYearsDuration(originalDate: Date): number {
   ) {
     years--;
   }
+  const durations = Math.max(0, years);
   
-  return Math.max(0, years);
+  return `${durations} year${durations > 1 ? 's': ''}`;
 }
 
 function formatDate(date: Date): string {
