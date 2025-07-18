@@ -1,5 +1,5 @@
 import React from 'react';
-import { View, Alert, StyleSheet } from 'react-native';
+import { View, Alert, StyleSheet, Platform } from 'react-native';
 import { useDates, TrackedDate, DateType } from '@/contexts/DateContext';
 import { DateCard } from './DateCard';
 
@@ -14,6 +14,12 @@ export function DateList() {
   });
 
   const handleDeleteDate = (id: string, title: string) => {
+    if (Platform.OS === 'web') {
+      if (confirm(`Are you sure you want to delete "${title}"?`)) {
+        removeDate(id);
+      }
+      return;
+    }
     Alert.alert(
       'Delete Date',
       `Are you sure you want to delete "${title}"?`,
