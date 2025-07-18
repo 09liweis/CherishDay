@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { View, Text, TouchableOpacity, Platform, StyleSheet } from 'react-native';
 import { Calendar, ChevronDown } from 'lucide-react-native';
+import DateTimePicker from '@react-native-community/datetimepicker';
 
 interface DatePickerProps {
   date: string;
@@ -65,11 +66,18 @@ export function DatePicker({ date, onDateChange }: DatePickerProps) {
       </TouchableOpacity>
 
       {showPicker && (
-        <View style={styles.picker}>
-          <Text style={styles.pickerTitle}>
-            Selected: {formatDate(date)}
-          </Text>
-        </View>
+        <DateTimePicker
+          value={new Date(date)}
+          mode="date"
+          display={Platform.OS === 'ios' ? 'spinner' : 'default'}
+          onChange={(event, selectedDate) => {
+            setShowPicker(false);
+            if (selectedDate) {
+              onDateChange(selectedDate.toISOString());
+            }
+          }}
+          style={styles.picker}
+        />
       )}
     </View>
   );
