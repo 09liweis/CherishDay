@@ -23,13 +23,13 @@ interface AddDateModalProps {
 export function AddDateModal({ visible, onClose }: AddDateModalProps) {
   const { addDate } = useDates();
   const [title, setTitle] = useState('');
-  const [selectedDate, setSelectedDate] = useState(new Date());
+  const [selectedDate, setSelectedDate] = useState('');
   const [type, setType] = useState<DateType>('one-time');
   const [errors, setErrors] = useState<{ title?: string; date?: string }>({});
 
   const resetForm = () => {
     setTitle('');
-    setSelectedDate(new Date());
+    setSelectedDate('');
     setType('one-time');
     setErrors({});
   };

@@ -1,6 +1,6 @@
 import React from 'react';
 import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
-import { Calendar, Clock, RotateCcw, Trash2 } from 'lucide-react-native';
+import { Calendar, Clock, RotateCcw, Trash2, Cake } from 'lucide-react-native';
 import { TrackedDate, DateType } from '@/contexts/DateContext';
 
 interface DateCardProps {
@@ -77,6 +77,15 @@ export function DateCard({ date, onDelete }: DateCardProps) {
           <Text style={[styles.statusText, getStatusTextStyle()]}>
             {getStatusText()}
           </Text>
+          
+          {date.type === 'yearly' && (
+            <View style={styles.durationContainer}>
+              <Cake size={14} color="#64748b" />
+              <Text style={styles.durationText}>
+                {getYearsDuration(new Date(date.date))} year{getYearsDuration(new Date(date.date)) !== 1 ? 's' : ''} duration
+              </Text>
+            </View>
+          )}
         </View>
 
         <TouchableOpacity
@@ -90,7 +99,7 @@ export function DateCard({ date, onDelete }: DateCardProps) {
   );
 }
 
-function getNextOccurrence(date: Date, type: DateType): Date {
+function getNextOccurrence(date: string, type: DateType): Date {
   const now = new Date();
   const originalDate = new Date(date);
   
@@ -124,6 +133,21 @@ function getDaysUntil(date: Date): number {
   
   const diffTime = targetDate.getTime() - today.getTime();
   return Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+}
+
+function getYearsDuration(originalDate: Date): number {
+  const now = new Date();
+  let years = now.getFullYear() - originalDate.getFullYear();
+  
+  // 如果今年的纪念日还没到，则减去1年
+  if (
+    now.getMonth() < originalDate.getMonth() || 
+    (now.getMonth() === originalDate.getMonth() && now.getDate() < originalDate.getDate())
+  ) {
+    years--;
+  }
+  
+  return Math.max(0, years);
 }
 
 function formatDate(date: Date): string {
@@ -213,5 +237,16 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     borderRadius: 8,
     backgroundColor: '#f1f5f9',
+  },
+  durationContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginTop: 4,
+  },
+  durationText: {
+    fontSize: 13,
+    color: '#64748b',
+    marginLeft: 4,
+    fontStyle: 'italic',
   },
 });

@@ -3,15 +3,16 @@ import { View, Text, TouchableOpacity, Platform, StyleSheet } from 'react-native
 import { Calendar, ChevronDown } from 'lucide-react-native';
 
 interface DatePickerProps {
-  date: Date;
-  onDateChange: (date: Date) => void;
+  date: string;
+  onDateChange: (date: string) => void;
 }
 
 export function DatePicker({ date, onDateChange }: DatePickerProps) {
   const [showPicker, setShowPicker] = useState(false);
 
-  const formatDate = (date: Date) => {
-    return date.toLocaleDateString('en-US', {
+  const formatDate = (date: string) => {
+    const dateObj = new Date(date);
+    return dateObj.toLocaleDateString('en-US', {
       weekday: 'long',
       year: 'numeric',
       month: 'long',
@@ -19,8 +20,9 @@ export function DatePicker({ date, onDateChange }: DatePickerProps) {
     });
   };
 
-  const formatInputDate = (date: Date) => {
-    return date.toLocaleDateString('en-US', {
+  const formatInputDate = (date: string) => {
+    const dateObj = new Date(date);
+    return dateObj.toLocaleDateString('en-US', {
       month: 'short',
       day: 'numeric',
       year: 'numeric'
@@ -33,8 +35,8 @@ export function DatePicker({ date, onDateChange }: DatePickerProps) {
       <View>
         <input
           type="date"
-          value={date.toISOString().split('T')[0]}
-          onChange={(e) => onDateChange(new Date(e.target.value + 'T00:00:00'))}
+          value={date}
+          onChange={(e) => onDateChange(e.target.value)}
           style={{
             border: '1px solid #d1d5db',
             borderRadius: '8px',
@@ -67,43 +69,6 @@ export function DatePicker({ date, onDateChange }: DatePickerProps) {
           <Text style={styles.pickerTitle}>
             Selected: {formatDate(date)}
           </Text>
-          
-          {/* Quick Date Options */}
-          <View style={styles.quickOptions}>
-            <TouchableOpacity
-              onPress={() => {
-                onDateChange(new Date());
-                setShowPicker(false);
-              }}
-              style={styles.quickOption}
-            >
-              <Text style={styles.quickOptionText}>Today</Text>
-            </TouchableOpacity>
-            
-            <TouchableOpacity
-              onPress={() => {
-                const tomorrow = new Date();
-                tomorrow.setDate(tomorrow.getDate() + 1);
-                onDateChange(tomorrow);
-                setShowPicker(false);
-              }}
-              style={styles.quickOption}
-            >
-              <Text style={styles.quickOptionText}>Tomorrow</Text>
-            </TouchableOpacity>
-            
-            <TouchableOpacity
-              onPress={() => {
-                const nextWeek = new Date();
-                nextWeek.setDate(nextWeek.getDate() + 7);
-                onDateChange(nextWeek);
-                setShowPicker(false);
-              }}
-              style={styles.quickOption}
-            >
-              <Text style={styles.quickOptionText}>Next Week</Text>
-            </TouchableOpacity>
-          </View>
         </View>
       )}
     </View>
