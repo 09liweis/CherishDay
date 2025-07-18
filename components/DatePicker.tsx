@@ -11,16 +11,6 @@ interface DatePickerProps {
 export function DatePicker({ date, onDateChange }: DatePickerProps) {
   const [showPicker, setShowPicker] = useState(false);
 
-  const formatDate = (date: string) => {
-    const dateObj = new Date(date);
-    return dateObj.toLocaleDateString('en-US', {
-      weekday: 'long',
-      year: 'numeric',
-      month: 'long',
-      day: 'numeric'
-    });
-  };
-
   const formatInputDate = (date: string) => {
     const dateObj = new Date(date);
     return dateObj.toLocaleDateString('en-US', {
