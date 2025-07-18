@@ -12,7 +12,7 @@ export function DatePicker({ date, onDateChange }: DatePickerProps) {
   const [showPicker, setShowPicker] = useState(false);
 
   const formatInputDate = (date: string) => {
-    const dateObj = new Date(date);
+    const dateObj = date ? new Date(date) : new Date();
     return dateObj.toLocaleDateString('en-US', {
       month: 'short',
       day: 'numeric',
@@ -57,7 +57,7 @@ export function DatePicker({ date, onDateChange }: DatePickerProps) {
 
       {showPicker && (
         <DateTimePicker
-          value={new Date(date)}
+          value={new Date()}
           mode="date"
           display={Platform.OS === 'ios' ? 'spinner' : 'default'}
           onChange={(event, selectedDate) => {
