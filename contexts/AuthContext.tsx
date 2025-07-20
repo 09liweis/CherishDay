@@ -28,7 +28,13 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       try {
         setIsLoading(true);
         const currentUser = await appwriteAuth.getCurrentUser();
-        setUser(currentUser);
+        // 确保currentUser不为null才设置用户
+        if (currentUser) {
+          setUser(currentUser);
+        } else {
+          console.log('未获取到用户信息，用户可能未登录');
+          setUser(null);
+        }
       } catch (err) {
         console.error('检查用户状态失败:', err);
         setUser(null);
@@ -47,7 +53,15 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       setError(null);
       await appwriteAuth.login(email, password);
       const currentUser = await appwriteAuth.getCurrentUser();
-      setUser(currentUser);
+      // 确保currentUser不为null才设置用户
+      if (currentUser) {
+        setUser(currentUser);
+      } else {
+        console.error('登录成功但获取用户信息失败');
+        setError('登录成功但获取用户信息失败，请重试');
+        setUser(null);
+        throw new Error('登录成功但获取用户信息失败');
+      }
     } catch (err: any) {
       console.error('登录失败:', err);
       setError(err.message || '登录失败，请检查您的凭据');
@@ -63,8 +77,18 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       setIsLoading(true);
       setError(null);
       await appwriteAuth.register(email, password, name);
+      // 注册后需要登录才能获取用户信息
+      await appwriteAuth.login(email, password);
       const currentUser = await appwriteAuth.getCurrentUser();
-      setUser(currentUser);
+      // 确保currentUser不为null才设置用户
+      if (currentUser) {
+        setUser(currentUser);
+      } else {
+        console.error('注册成功但获取用户信息失败');
+        setError('注册成功但获取用户信息失败，请尝试重新登录');
+        setUser(null);
+        throw new Error('注册成功但获取用户信息失败');
+      }
     } catch (err: any) {
       console.error('注册失败:', err);
       setError(err.message || '注册失败，请稍后再试');
