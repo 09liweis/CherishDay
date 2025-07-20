@@ -1,6 +1,6 @@
 import { APP_NAME } from '@/constant/text';
 import { Tabs } from 'expo-router';
-import { Calendar } from 'lucide-react-native';
+import { Calendar, User } from 'lucide-react-native';
 
 export default function TabLayout() {
   return (
@@ -28,6 +28,15 @@ export default function TabLayout() {
           title: APP_NAME,
           tabBarIcon: ({ size, color }) => (
             <Calendar size={size} color={color} />
+          ),
+        }}
+      />
+      <Tabs.Screen
+        name="profile"
+        options={{
+          title: "个人中心",
+          tabBarIcon: ({ size, color }) => (
+            <User size={size} color={color} />
           ),
         }}
       />
