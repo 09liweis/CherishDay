@@ -4,6 +4,7 @@ import { useEffect } from 'react';
 import { Databases, ID, Query } from 'appwrite';
 import { client } from '../constant/appwrite';
 import { useAuth } from './AuthContext';
+import NetInfo from '@react-native-community/netinfo';
 
 // Appwrite 数据库配置
 const databases = new Databases(client);
@@ -26,6 +27,7 @@ interface DateContextType {
   isLoading: boolean;
   error: string | null;
   refreshDates: () => Promise<void>;
+  isOffline: boolean;
 }
 
 const STORAGE_KEY = '@date_tracker_dates';
@@ -36,7 +38,36 @@ export function DateProvider({ children }: { children: ReactNode }) {
   const [dates, setDates] = useState<TrackedDate[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
+  const [isOffline, setIsOffline] = useState<boolean>(false);
   const { user } = useAuth();
+
+  // 检查网络连接状态
+  const checkNetworkConnection = async (): Promise<boolean> => {
+    const state = await NetInfo.fetch();
+    const isConnected = state.isConnected ?? false;
+    setIsOffline(!isConnected);
+    return isConnected;
+  };
+
+  // 监听网络连接状态
+  useEffect(() => {
+    const unsubscribe = NetInfo.addEventListener(state => {
+      const isConnected = state.isConnected ?? false;
+      setIsOffline(!isConnected);
+      
+      // 当网络恢复连接时，尝试同步数据
+      if (isConnected && user) {
+        loadDates();
+      }
+    });
+    
+    // 初始检查网络状态
+    checkNetworkConnection();
+    
+    return () => {
+      unsubscribe();
+    };
+  }, [user]);
 
   // Load dates from storage on app start
   useEffect(() => {
@@ -61,6 +92,30 @@ export function DateProvider({ children }: { children: ReactNode }) {
     setIsLoading(true);
     setError(null);
     
+    // 检查网络连接状态
+    const isConnected = await checkNetworkConnection();
+    
+    // 如果没有网络连接，直接从本地加载数据
+    if (!isConnected) {
+      try {
+        const storedDates = await AsyncStorage.getItem(STORAGE_KEY);
+        if (storedDates) {
+          const parsedDates = JSON.parse(storedDates);
+          setDates(parsedDates);
+          setError('无网络连接，使用本地缓存数据');
+        } else {
+          setError('无网络连接，且无本地缓存数据');
+        }
+        setIsLoading(false);
+        return;
+      } catch (storageError) {
+        console.error('Error loading dates from storage:', storageError);
+        setError('无网络连接，且无法加载本地数据');
+        setIsLoading(false);
+        return;
+      }
+    }
+    
     try {
       // 从 Appwrite 数据库加载数据
       const response = await databases.listDocuments(
@@ -84,10 +139,7 @@ export function DateProvider({ children }: { children: ReactNode }) {
         // 如果 Appwrite 中没有数据，尝试从 AsyncStorage 加载
         const storedDates = await AsyncStorage.getItem(STORAGE_KEY);
         if (storedDates) {
-          const parsedDates = JSON.parse(storedDates).map((date: TrackedDate) => ({
-            ...date,
-            date: new Date(date.date),
-          }));
+          const parsedDates = JSON.parse(storedDates);
           setDates(parsedDates);
           
           // 不再将 AsyncStorage 中的数据同步到 Appwrite
@@ -102,10 +154,7 @@ export function DateProvider({ children }: { children: ReactNode }) {
       try {
         const storedDates = await AsyncStorage.getItem(STORAGE_KEY);
         if (storedDates) {
-          const parsedDates = JSON.parse(storedDates).map((date: TrackedDate) => ({
-            ...date,
-            date: new Date(date.date),
-          }));
+          const parsedDates = JSON.parse(storedDates);
           setDates(parsedDates);
           setError('使用本地缓存数据，部分功能可能受限');
         }
@@ -164,16 +213,28 @@ export function DateProvider({ children }: { children: ReactNode }) {
     setIsLoading(true);
     setError(null);
     
+    // 检查网络连接状态
+    const isConnected = await checkNetworkConnection();
+    
+    // 创建一个唯一ID
+    const uniqueId = isConnected ? ID.unique() : Math.random().toString(36).substr(2, 9);
+    
+    // 创建新的日期对象
+    const newDate: TrackedDate = {
+      ...dateData,
+      id: uniqueId,
+    };
+    
+    // 如果没有网络连接，直接添加到本地状态
+    if (!isConnected) {
+      setDates(prevDates => [...prevDates, newDate]);
+      await AsyncStorage.setItem(STORAGE_KEY, JSON.stringify([...dates, newDate]));
+      setError('无网络连接，日期已保存到本地');
+      setIsLoading(false);
+      return;
+    }
+    
     try {
-      // 创建一个唯一ID
-      const uniqueId = ID.unique();
-      
-      // 创建新的日期对象
-      const newDate: TrackedDate = {
-        ...dateData,
-        id: uniqueId,
-      };
-      
       // 添加到 Appwrite 数据库
       await databases.createDocument(
         DATABASE_ID,
@@ -212,6 +273,28 @@ export function DateProvider({ children }: { children: ReactNode }) {
     setIsLoading(true);
     setError(null);
     
+    // 检查网络连接状态
+    const isConnected = await checkNetworkConnection();
+    
+    // 更新本地状态
+    setDates(prevDates => prevDates.filter(date => date.id !== id));
+    
+    // 如果没有日期了，清除存储
+    if (dates.length <= 1) { // 使用 <= 1 因为当前日期还没有从 dates 中移除
+      AsyncStorage.removeItem(STORAGE_KEY);
+    } else {
+      // 更新 AsyncStorage
+      const updatedDates = dates.filter(date => date.id !== id);
+      await AsyncStorage.setItem(STORAGE_KEY, JSON.stringify(updatedDates));
+    }
+    
+    // 如果没有网络连接，只更新本地状态
+    if (!isConnected) {
+      setError('无网络连接，日期已从本地删除，将在网络恢复后同步到云端');
+      setIsLoading(false);
+      return;
+    }
+    
     try {
       // 从 Appwrite 数据库中删除
       await databases.deleteDocument(
@@ -219,33 +302,16 @@ export function DateProvider({ children }: { children: ReactNode }) {
         COLLECTION_ID,
         id
       );
-      
-      // 更新本地状态
-      setDates(prevDates => prevDates.filter(date => date.id !== id));
-      
-      // 如果没有日期了，清除存储
-      if (dates.length <= 1) { // 使用 <= 1 因为当前日期还没有从 dates 中移除
-        AsyncStorage.removeItem(STORAGE_KEY);
-      }
-      
     } catch (error) {
       console.error('Failed to remove date from Appwrite', error);
-      setError('从云端删除日期失败，已从本地删除');
-      
-      // 如果 Appwrite 删除失败，仅从本地状态中删除
-      setDates(prevDates => prevDates.filter(date => date.id !== id));
-      
-      // 如果没有日期了，清除存储
-      if (dates.length <= 1) {
-        AsyncStorage.removeItem(STORAGE_KEY);
-      }
+      setError('从云端删除日期失败，但已从本地移除');
     } finally {
       setIsLoading(false);
     }
   };
 
   return (
-    <DateContext.Provider value={{ dates, addDate, removeDate, isLoading, error, refreshDates }}>
+    <DateContext.Provider value={{ dates, addDate, removeDate, isLoading, error, refreshDates, isOffline }}>
       {children}
     </DateContext.Provider>
   );
