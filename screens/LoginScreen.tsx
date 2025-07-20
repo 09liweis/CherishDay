@@ -36,9 +36,7 @@ const LoginScreen = ({ isModal = false, onLoginSuccess }: LoginScreenProps) => {
   };
 
   return (
-    <View style={styles.container}>
-      <Text style={styles.title}>登录</Text>
-      
+    <View style={styles.container}>      
       {error && <Text style={styles.errorText}>{error}</Text>}
       
       <TextInput
@@ -82,8 +80,6 @@ const LoginScreen = ({ isModal = false, onLoginSuccess }: LoginScreenProps) => {
 const styles = StyleSheet.create({
   container: {
     justifyContent: 'center',
-    padding: 20,
-    backgroundColor: '#f5f5f5',
   },
   title: {
     fontSize: 24,
