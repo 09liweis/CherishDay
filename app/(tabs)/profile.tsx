@@ -1,18 +1,27 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, Image, ActivityIndicator } from 'react-native';
 import { useAuth } from '../../contexts/AuthContext';
-import { router } from 'expo-router';
+import { LoginModal } from '@/components/LoginModal';
 
 const ProfileScreen = () => {
   const { user, logout, isLoading } = useAuth();
+  const [showLoginModal, setShowLoginModal] = useState(false);
 
+  /**
+   * Handles user logout process.
+   * Attempts to call the logout function and logs any errors that occur.
+   * @async
+   */
   const handleLogout = async () => {
     try {
       await logout();
-      router.replace('/login');
     } catch (error) {
       console.error('登出失败:', error);
     }
+  };
+
+  const handleLoginSuccess = () => {
+    setShowLoginModal(false);
   };
 
   if (isLoading) {
@@ -24,9 +33,24 @@ const ProfileScreen = () => {
   }
 
   if (!user) {
-    // 如果用户未登录，重定向到登录页面
-    router.replace('/login');
-    return null;
+    // 如果用户未登录，显示登录模态框
+    return (
+      <View style={styles.loginContainer}>
+        <Text style={styles.title}>请登录以查看个人资料</Text>
+        <TouchableOpacity 
+          style={styles.loginButton} 
+          onPress={() => setShowLoginModal(true)}
+        >
+          <Text style={styles.loginButtonText}>登录</Text>
+        </TouchableOpacity>
+        
+        <LoginModal 
+          visible={showLoginModal} 
+          onClose={() => setShowLoginModal(false)}
+          onLoginSuccess={handleLoginSuccess}
+        />
+      </View>
+    );
   }
 
   return (
@@ -65,6 +89,32 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: '#f5f5f5',
     padding: 20,
+  },
+  loginContainer: {
+    flex: 1,
+    backgroundColor: '#f5f5f5',
+    padding: 20,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  loginButton: {
+    backgroundColor: '#007bff',
+    borderRadius: 10,
+    padding: 15,
+    alignItems: 'center',
+    width: 200,
+    marginTop: 20,
+  },
+  loginButtonText: {
+    color: 'white',
+    fontWeight: 'bold',
+    fontSize: 16,
+  },
+  title: {
+    fontSize: 24,
+    fontWeight: 'bold',
+    textAlign: 'center',
+    marginBottom: 20,
   },
   loadingContainer: {
     flex: 1,

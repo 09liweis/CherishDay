@@ -3,7 +3,12 @@ import { View, Text, StyleSheet, TextInput, TouchableOpacity, ActivityIndicator,
 import { useAuth } from '../contexts/AuthContext';
 import { router } from 'expo-router';
 
-const LoginScreen = () => {
+interface LoginScreenProps {
+  isModal?: boolean;
+  onLoginSuccess?: () => void;
+}
+
+const LoginScreen = ({ isModal = false, onLoginSuccess }: LoginScreenProps) => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const { login, isLoading, error } = useAuth();
@@ -16,14 +21,18 @@ const LoginScreen = () => {
 
     try {
       await login(email, password);
-      router.replace('/(tabs)');
+      if (isModal && onLoginSuccess) {
+        onLoginSuccess();
+      } else {
+        router.replace('/(tabs)');
+      }
     } catch (err) {
       // 错误已在 AuthContext 中处理
     }
   };
 
   const navigateToRegister = () => {
-    router.push(`/register`);
+    // router.push(`/register`);
   };
 
   return (
@@ -72,7 +81,6 @@ const LoginScreen = () => {
 
 const styles = StyleSheet.create({
   container: {
-    flex: 1,
     justifyContent: 'center',
     padding: 20,
     backgroundColor: '#f5f5f5',
