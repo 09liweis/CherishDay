@@ -36,12 +36,11 @@ const ProfileScreen = () => {
     // 如果用户未登录，显示登录模态框
     return (
       <View style={styles.loginContainer}>
-        <Text style={styles.title}>请登录以查看个人资料</Text>
         <TouchableOpacity 
           style={styles.loginButton} 
           onPress={() => setShowLoginModal(true)}
         >
-          <Text style={styles.loginButtonText}>登录</Text>
+          <Text style={styles.loginButtonText}>Login to cherish your days</Text>
         </TouchableOpacity>
         
         <LoginModal 
@@ -64,13 +63,13 @@ const ProfileScreen = () => {
       </View>
 
       <View style={styles.infoSection}>
-        <Text style={styles.sectionTitle}>账号信息</Text>
+        <Text style={styles.sectionTitle}>Account Detail</Text>
         <View style={styles.infoItem}>
-          <Text style={styles.infoLabel}>用户ID</Text>
+          <Text style={styles.infoLabel}>ID</Text>
           <Text style={styles.infoValue}>{user.$id}</Text>
         </View>
         <View style={styles.infoItem}>
-          <Text style={styles.infoLabel}>注册时间</Text>
+          <Text style={styles.infoLabel}>Register Time</Text>
           <Text style={styles.infoValue}>
             {new Date(user.$createdAt).toLocaleDateString()}
           </Text>
@@ -78,7 +77,7 @@ const ProfileScreen = () => {
       </View>
 
       <TouchableOpacity style={styles.logoutButton} onPress={handleLogout}>
-        <Text style={styles.logoutButtonText}>退出登录</Text>
+        <Text style={styles.logoutButtonText}>Logout</Text>
       </TouchableOpacity>
     </View>
   );
@@ -109,12 +108,6 @@ const styles = StyleSheet.create({
     color: 'white',
     fontWeight: 'bold',
     fontSize: 16,
-  },
-  title: {
-    fontSize: 24,
-    fontWeight: 'bold',
-    textAlign: 'center',
-    marginBottom: 20,
   },
   loadingContainer: {
     flex: 1,
