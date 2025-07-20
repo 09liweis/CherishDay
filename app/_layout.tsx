@@ -2,11 +2,13 @@ import { Stack } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
 import { useFrameworkReady } from '@/hooks/useFrameworkReady';
 import { DateProvider } from '@/contexts/DateContext';
+import { AuthProvider } from '@/contexts/AuthContext';
 
 export default function RootLayout() {
   useFrameworkReady();
 
   return (
+    <AuthProvider>
     <DateProvider>
       <Stack screenOptions={{ headerShown: false }}>
         <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
@@ -14,5 +16,6 @@ export default function RootLayout() {
       </Stack>
       <StatusBar style="auto" />
     </DateProvider>
+    </AuthProvider>
   );
 }
