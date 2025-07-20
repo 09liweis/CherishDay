@@ -155,47 +155,11 @@ export function DateProvider({ children }: { children: ReactNode }) {
     if (!user) return;
     
     try {
-      // 保存到 AsyncStorage
+      // 只保存到 AsyncStorage，不同步到 Appwrite
       await AsyncStorage.setItem(STORAGE_KEY, JSON.stringify(dates));
       
-      // 确保 Appwrite 数据库中的数据与本地状态同步
-      // 这里我们采用简单的方法：先清除所有数据，然后重新添加
-      // 在实际应用中，可能需要更复杂的同步策略
-      try {
-        // 获取当前用户的所有日期
-        const response = await databases.listDocuments(
-          DATABASE_ID,
-          COLLECTION_ID,
-          [Query.equal('userId', user.$id)]
-        );
-        
-        // 删除所有现有文档
-        for (const doc of response.documents) {
-          await databases.deleteDocument(
-            DATABASE_ID,
-            COLLECTION_ID,
-            doc.$id
-          );
-        }
-        
-        // 重新添加所有日期
-        for (const date of dates) {
-          await databases.createDocument(
-            DATABASE_ID,
-            COLLECTION_ID,
-            date.id,
-            {
-              userId: user.$id,
-              title: date.title,
-              date: date.date,
-              type: date.type,
-              createdAt: date.createdAt.toISOString(),
-            }
-          );
-        }
-      } catch (appwriteError) {
-        console.error('Error syncing dates with Appwrite:', appwriteError);
-      }
+      // 不再执行将本地数据同步到 Appwrite 的操作
+      // 这样确保只有 Appwrite -> 本地 的同步，而不是双向同步
     } catch (error) {
       console.error('Error saving dates to storage:', error);
     }
