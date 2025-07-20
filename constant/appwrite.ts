@@ -1,3 +1,4 @@
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Account, Client, ID } from 'appwrite';
 import Constants from 'expo-constants';
 
@@ -56,7 +57,12 @@ export const appwriteAuth = {
   // 获取当前用户信息
   getCurrentUser: async () => {
     try {
-      return await account.get();
+      const authCookie = await AsyncStorage.getItem('cookieFallback');
+      if (authCookie && authCookie !== '[]') {
+        return await account.get();
+      } else {
+        return null;
+      }
     } catch (error) {
       console.error('获取用户信息失败:', error);
       return null;
