@@ -8,9 +8,11 @@ import {
   TouchableWithoutFeedback,
   KeyboardAvoidingView,
   Platform,
-  StyleSheet
+  StyleSheet,
+  ActivityIndicator,
+  Alert
 } from 'react-native';
-import { X } from 'lucide-react-native';
+import { X, AlertCircle } from 'lucide-react-native';
 import { useDates, DateType } from '@/contexts/DateContext';
 import { DatePicker } from './DatePicker';
 import { TypeSelector } from './TypeSelector';
@@ -21,7 +23,7 @@ interface AddDateModalProps {
 }
 
 export function AddDateModal({ visible, onClose }: AddDateModalProps) {
-  const { addDate } = useDates();
+  const { addDate, isLoading, error } = useDates();
   const [title, setTitle] = useState('');
   const [selectedDate, setSelectedDate] = useState('');
   const [type, setType] = useState<DateType>('one-time');
@@ -45,19 +47,24 @@ export function AddDateModal({ visible, onClose }: AddDateModalProps) {
     return Object.keys(newErrors).length === 0;
   };
 
-  const handleSave = () => {
+  const handleSave = async () => {
     if (!validateForm()) {
       return;
     }
 
-    addDate({
-      title: title.trim(),
-      date: selectedDate,
-      type,
-    });
-
-    resetForm();
-    onClose();
+    try {
+      await addDate({
+        title: title.trim(),
+        date: selectedDate,
+        type,
+      });
+      
+      resetForm();
+      onClose();
+    } catch (err) {
+      // 错误已经在 DateContext 中处理，这里不需要额外处理
+      console.error('Failed to add date:', err);
+    }
   };
 
   const handleClose = () => {
@@ -90,6 +97,14 @@ export function AddDateModal({ visible, onClose }: AddDateModalProps) {
                   </TouchableOpacity>
                 </View>
 
+                {/* Error Message */}
+                {error && (
+                  <View style={styles.errorContainer}>
+                    <AlertCircle size={20} color="#b91c1c" />
+                    <Text style={styles.errorMessage}>{error}</Text>
+                  </View>
+                )}
+                
                 {/* Form Fields */}
                 <View style={styles.form}>
                   {/* Title Input */}
@@ -150,9 +165,14 @@ export function AddDateModal({ visible, onClose }: AddDateModalProps) {
                   </TouchableOpacity>
                   <TouchableOpacity
                     onPress={handleSave}
-                    style={styles.saveButton}
+                    style={[styles.saveButton, isLoading && styles.saveButtonDisabled]}
+                    disabled={isLoading}
                   >
-                    <Text style={styles.saveButtonText}>Save Date</Text>
+                    {isLoading ? (
+                      <ActivityIndicator size="small" color="#ffffff" />
+                    ) : (
+                      <Text style={styles.saveButtonText}>Save Date</Text>
+                    )}
                   </TouchableOpacity>
                 </View>
               </View>
@@ -260,5 +280,22 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     fontWeight: '600',
     color: '#ffffff',
+  },
+  saveButtonDisabled: {
+    backgroundColor: '#93c5fd',
+  },
+  errorContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#fee2e2',
+    padding: 12,
+    borderRadius: 8,
+    marginBottom: 16,
+  },
+  errorMessage: {
+    color: '#b91c1c',
+    marginLeft: 8,
+    fontSize: 14,
+    flex: 1,
   },
 });

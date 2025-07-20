@@ -1,6 +1,16 @@
 import React, { useState } from 'react';
-import { View, Text, ScrollView, TouchableOpacity, SafeAreaView, StyleSheet } from 'react-native';
-import { Calendar, Plus } from 'lucide-react-native';
+import { 
+  View, 
+  Text, 
+  ScrollView, 
+  TouchableOpacity, 
+  SafeAreaView, 
+  StyleSheet, 
+  ActivityIndicator, 
+  RefreshControl,
+  Alert
+} from 'react-native';
+import { Calendar, Plus, AlertCircle } from 'lucide-react-native';
 import { useDates } from '@/contexts/DateContext';
 import { DateList } from '@/components/DateList';
 import { AddDateModal } from '@/components/AddDateModal';
@@ -8,7 +18,14 @@ import { APP_NAME } from '@/constant/text';
 
 export default function HomeScreen() {
   const [isModalVisible, setIsModalVisible] = useState(false);
-  const { dates } = useDates();
+  const [refreshing, setRefreshing] = useState(false);
+  const { dates, isLoading, error, refreshDates } = useDates();
+  
+  const onRefresh = async () => {
+    setRefreshing(true);
+    await refreshDates();
+    setRefreshing(false);
+  };
 
   return (
     <SafeAreaView style={styles.container}>
@@ -36,8 +53,36 @@ export default function HomeScreen() {
           style={styles.scrollView} 
           contentContainerStyle={styles.scrollContent}
           showsVerticalScrollIndicator={false}
+          refreshControl={
+            <RefreshControl
+              refreshing={refreshing}
+              onRefresh={onRefresh}
+              colors={['#3b82f6']}
+              tintColor="#3b82f6"
+            />
+          }
         >
-          {dates.length === 0 ? (
+          {/* 错误提示 */}
+          {error && (
+            <View style={styles.errorContainer}>
+              <AlertCircle size={24} color="#ef4444" />
+              <Text style={styles.errorText}>{error}</Text>
+              <TouchableOpacity 
+                style={styles.retryButton}
+                onPress={refreshDates}
+              >
+                <Text style={styles.retryButtonText}>重试</Text>
+              </TouchableOpacity>
+            </View>
+          )}
+          
+          {/* 加载指示器 */}
+          {isLoading && !refreshing ? (
+            <View style={styles.loadingContainer}>
+              <ActivityIndicator size="large" color="#3b82f6" />
+              <Text style={styles.loadingText}>加载中...</Text>
+            </View>
+          ) : dates.length === 0 ? (
             <View style={styles.emptyState}>
               <View style={styles.emptyIcon}>
                 <Calendar size={32} color="#64748b" />
@@ -83,6 +128,46 @@ const styles = StyleSheet.create({
     backgroundColor: '#ffffff',
     borderBottomWidth: 1,
     borderBottomColor: '#e2e8f0',
+  },
+  loadingContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    padding: 20,
+    marginTop: 40,
+  },
+  loadingText: {
+    marginTop: 12,
+    fontSize: 16,
+    color: '#64748b',
+  },
+  errorContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#fef2f2',
+    borderWidth: 1,
+    borderColor: '#fee2e2',
+    borderRadius: 8,
+    padding: 16,
+    margin: 16,
+  },
+  errorText: {
+    flex: 1,
+    marginLeft: 12,
+    fontSize: 14,
+    color: '#b91c1c',
+  },
+  retryButton: {
+    backgroundColor: '#ef4444',
+    paddingVertical: 6,
+    paddingHorizontal: 12,
+    borderRadius: 4,
+    marginLeft: 8,
+  },
+  retryButtonText: {
+    color: '#ffffff',
+    fontSize: 14,
+    fontWeight: '500',
   },
   headerContent: {
     flexDirection: 'row',
