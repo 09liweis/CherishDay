@@ -93,10 +93,8 @@ export function DateProvider({ children }: { children: ReactNode }) {
           }));
           setDates(parsedDates);
           
-          // 将 AsyncStorage 中的数据同步到 Appwrite
-          for (const date of parsedDates) {
-            await addDateToAppwrite(date);
-          }
+          // 不再将 AsyncStorage 中的数据同步到 Appwrite
+          // 这样确保只有 Appwrite -> 本地 的同步，而不是双向同步
         }
       }
     } catch (error) {
