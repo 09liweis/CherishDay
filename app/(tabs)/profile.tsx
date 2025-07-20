@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, Image, ActivityIndicator } from 'react-native';
 import { useAuth } from '../../contexts/AuthContext';
 import { LoginModal } from '@/components/LoginModal';
+import { router } from 'expo-router';
 
 const ProfileScreen = () => {
   const { user, logout, isLoading } = useAuth();
@@ -22,6 +23,7 @@ const ProfileScreen = () => {
 
   const handleLoginSuccess = () => {
     setShowLoginModal(false);
+    router.back();
   };
 
   if (isLoading) {
