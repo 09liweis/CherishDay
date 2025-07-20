@@ -41,7 +41,7 @@ const LoginScreen = ({ isModal = false, onLoginSuccess }: LoginScreenProps) => {
       
       <TextInput
         style={styles.input}
-        placeholder="电子邮箱"
+        placeholder="Email"
         value={email}
         onChangeText={setEmail}
         keyboardType="email-address"
@@ -50,7 +50,7 @@ const LoginScreen = ({ isModal = false, onLoginSuccess }: LoginScreenProps) => {
       
       <TextInput
         style={styles.input}
-        placeholder="密码"
+        placeholder="Password"
         value={password}
         onChangeText={setPassword}
         secureTextEntry
@@ -64,7 +64,7 @@ const LoginScreen = ({ isModal = false, onLoginSuccess }: LoginScreenProps) => {
         {isLoading ? (
           <ActivityIndicator color="#fff" />
         ) : (
-          <Text style={styles.buttonText}>登录</Text>
+          <Text style={styles.buttonText}>Login</Text>
         )}
       </TouchableOpacity>
       
