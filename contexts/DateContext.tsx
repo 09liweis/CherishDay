@@ -17,12 +17,11 @@ export interface TrackedDate {
   title: string;
   date: string;
   type: DateType;
-  createdAt: Date;
 }
 
 interface DateContextType {
   dates: TrackedDate[];
-  addDate: (date: Omit<TrackedDate, 'id' | 'createdAt'>) => void;
+  addDate: (date: Omit<TrackedDate, 'id'>) => void;
   removeDate: (id: string) => void;
   isLoading: boolean;
   error: string | null;
@@ -76,7 +75,6 @@ export function DateProvider({ children }: { children: ReactNode }) {
           title: doc.title,
           date: doc.date,
           type: doc.type as DateType,
-          createdAt: new Date(doc.createdAt),
         }));
         setDates(appwriteDates);
         
@@ -89,7 +87,6 @@ export function DateProvider({ children }: { children: ReactNode }) {
           const parsedDates = JSON.parse(storedDates).map((date: TrackedDate) => ({
             ...date,
             date: new Date(date.date),
-            createdAt: new Date(date.createdAt),
           }));
           setDates(parsedDates);
           
@@ -108,7 +105,6 @@ export function DateProvider({ children }: { children: ReactNode }) {
           const parsedDates = JSON.parse(storedDates).map((date: TrackedDate) => ({
             ...date,
             date: new Date(date.date),
-            createdAt: new Date(date.createdAt),
           }));
           setDates(parsedDates);
           setError('使用本地缓存数据，部分功能可能受限');
@@ -141,7 +137,6 @@ export function DateProvider({ children }: { children: ReactNode }) {
           title: date.title,
           date: date.date,
           type: date.type,
-          createdAt: date.createdAt.toISOString(),
         }
       );
     } catch (error) {
@@ -163,7 +158,7 @@ export function DateProvider({ children }: { children: ReactNode }) {
     }
   };
 
-  const addDate = async (dateData: Omit<TrackedDate, 'id' | 'createdAt'>) => {
+  const addDate = async (dateData: Omit<TrackedDate, 'id'>) => {
     if (!user) return;
     
     setIsLoading(true);
@@ -177,7 +172,6 @@ export function DateProvider({ children }: { children: ReactNode }) {
       const newDate: TrackedDate = {
         ...dateData,
         id: uniqueId,
-        createdAt: new Date(),
       };
       
       // 添加到 Appwrite 数据库
@@ -190,7 +184,6 @@ export function DateProvider({ children }: { children: ReactNode }) {
           title: newDate.title,
           date: newDate.date,
           type: newDate.type,
-          createdAt: newDate.createdAt.toISOString(),
         }
       );
       
@@ -206,7 +199,6 @@ export function DateProvider({ children }: { children: ReactNode }) {
       const fallbackDate: TrackedDate = {
         ...dateData,
         id: fallbackId,
-        createdAt: new Date(),
       };
       setDates(prevDates => [...prevDates, fallbackDate]);
     } finally {
