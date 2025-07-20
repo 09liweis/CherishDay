@@ -1,13 +1,27 @@
 import { Account, Client, ID } from 'appwrite';
+import Constants from 'expo-constants';
+
+// 从环境变量中获取 Appwrite 配置
+// 优先使用 process.env，如果不可用则尝试从 expo-constants 获取
+const APPWRITE_ENDPOINT = process.env.EXPO_PUBLIC_APPWRITE_ENDPOINT || 
+  Constants.expoConfig?.extra?.appwriteEndpoint
+
+const APPWRITE_PROJECT_ID = process.env.EXPO_PUBLIC_APPWRITE_PROJECT_ID || 
+  Constants.expoConfig?.extra?.appwriteProjectId
 
 // 初始化 Appwrite 客户端
 export const client = new Client();
 
 // 配置 Appwrite 客户端
-// 注意：在实际应用中，这些值应该从环境变量中获取
 client
-  .setEndpoint('https://nyc.cloud.appwrite.io/v1') // 设置 Appwrite 端点
-  .setProject('68793df7003a41322941'); // 设置项目 ID，需要替换为实际的项目 ID
+  .setEndpoint(APPWRITE_ENDPOINT) // 设置 Appwrite 端点
+  .setProject(APPWRITE_PROJECT_ID); // 设置项目 ID
+
+// 导出 Appwrite 配置，以便在其他地方使用
+export const APPWRITE_CONFIG = {
+  endpoint: APPWRITE_ENDPOINT,
+  projectId: APPWRITE_PROJECT_ID,
+};
 
 // 创建账户实例
 export const account = new Account(client);
