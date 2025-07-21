@@ -43,10 +43,15 @@ export function DateProvider({ children }: { children: ReactNode }) {
 
   // 检查网络连接状态
   const checkNetworkConnection = async (): Promise<boolean> => {
-    const state = await NetInfo.fetch();
-    const isConnected = state.isConnected ?? false;
-    setIsOffline(!isConnected);
-    return isConnected;
+    try {
+      const state = await NetInfo.fetch();
+      const isConnected = state.isConnected ?? false;
+      setIsOffline(!isConnected);
+      return isConnected;
+    } catch (error) {
+      console.error('Error checking network connection:', error);
+      return false;
+    }
   };
 
   // 监听网络连接状态
