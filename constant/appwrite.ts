@@ -15,7 +15,8 @@ export const client = new Client();
 // 配置 Appwrite 客户端
 client
   .setEndpoint(APPWRITE_ENDPOINT) // 设置 Appwrite 端点
-  .setProject(APPWRITE_PROJECT_ID); // 设置项目 ID
+  .setProject(APPWRITE_PROJECT_ID) // 设置项目 ID
+  .setPlatform('com.cherishdays.app'); 
 
 // 导出 Appwrite 配置，以便在其他地方使用
 export const APPWRITE_CONFIG = {
