@@ -10,7 +10,7 @@ import {
   RefreshControl,
   Alert
 } from 'react-native';
-import { Calendar, Plus, AlertCircle } from 'lucide-react-native';
+import { Calendar, Plus, AlertCircle } from '@/constant/icons';
 import { useDates } from '@/contexts/DateContext';
 import { DateList } from '@/components/DateList';
 import { AddDateModal } from '@/components/AddDateModal';
