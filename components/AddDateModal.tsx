@@ -12,7 +12,7 @@ import {
   ActivityIndicator,
   Alert
 } from 'react-native';
-import { X, AlertCircle } from 'lucide-react-native';
+import { X, AlertCircle } from '@/constant/icons';
 import { useDates, DateType } from '@/contexts/DateContext';
 import { DatePicker } from './DatePicker';
 import { TypeSelector } from './TypeSelector';
