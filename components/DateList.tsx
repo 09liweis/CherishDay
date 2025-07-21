@@ -1,6 +1,6 @@
 import React from 'react';
 import { View, Alert, StyleSheet, Platform } from 'react-native';
-import { useDates, TrackedDate, DateType } from '@/contexts/DateContext';
+import { useDates, DateType } from '@/contexts/DateContext';
 import { DateCard } from './DateCard';
 
 export function DateList() {
