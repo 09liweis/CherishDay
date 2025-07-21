@@ -57,14 +57,8 @@ export const appwriteAuth = {
   // 获取当前用户信息
   getCurrentUser: async () => {
     try {
-      const authCookie = await AsyncStorage.getItem('cookieFallback');
-      if (authCookie && authCookie !== '[]') {
-        return await account.get();
-      } else {
-        return null;
-      }
+      return await account.get();
     } catch (error) {
-      console.error('获取用户信息失败:', error);
       return null;
     }
   },
