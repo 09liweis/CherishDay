@@ -2,6 +2,7 @@ import React from 'react';
 import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
 import { Calendar, Clock, RotateCcw, Trash2, Cake } from '@/constant/icons';
 import { TrackedDate, DateType } from '@/contexts/DateContext';
+import { getNextOccurrence } from '@/utils/dateUtils';
 
 interface DateCardProps {
   date: TrackedDate;
@@ -99,32 +100,6 @@ export function DateCard({ date, onDelete }: DateCardProps) {
   );
 }
 
-function getNextOccurrence(date: string, type: DateType): Date {
-  const now = new Date();
-  const originalDate = new Date(date);
-  
-  switch (type) {
-    case 'yearly':
-      let nextYear = new Date(now.getFullYear(), originalDate.getMonth(), originalDate.getDate());
-      if (nextYear <= now) {
-        nextYear = new Date(now.getFullYear() + 1, originalDate.getMonth(), originalDate.getDate());
-      }
-      return nextYear;
-      
-    case 'monthly':
-      let nextMonth = new Date(now.getFullYear(), now.getMonth(), originalDate.getDate());
-      if (nextMonth <= now) {
-        nextMonth = new Date(now.getFullYear(), now.getMonth() + 1, originalDate.getDate());
-      }
-      return nextMonth;
-      
-    case 'one-time':
-      return originalDate;
-      
-    default:
-      return originalDate;
-  }
-}
 
 function getDaysUntil(date: Date): number {
   const now = new Date();
