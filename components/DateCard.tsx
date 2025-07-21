@@ -1,6 +1,6 @@
 import React from 'react';
 import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
-import { Calendar, Clock, RotateCcw, Trash2, Cake } from 'lucide-react-native';
+import { Calendar, Clock, RotateCcw, Trash2, Cake } from '@/constant/icons';
 import { TrackedDate, DateType } from '@/contexts/DateContext';
 
 interface DateCardProps {
