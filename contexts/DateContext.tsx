@@ -4,7 +4,6 @@ import { useEffect } from 'react';
 import { Databases, ID, Query } from 'appwrite';
 import { client } from '../constant/appwrite';
 import { useAuth } from './AuthContext';
-import NetInfo from '@react-native-community/netinfo';
 
 // Appwrite 数据库配置
 const databases = new Databases(client);
@@ -27,7 +26,6 @@ interface DateContextType {
   isLoading: boolean;
   error: string | null;
   refreshDates: () => Promise<void>;
-  isOffline: boolean;
 }
 
 const STORAGE_KEY = '@date_tracker_dates';
@@ -38,41 +36,7 @@ export function DateProvider({ children }: { children: ReactNode }) {
   const [dates, setDates] = useState<TrackedDate[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
-  const [isOffline, setIsOffline] = useState<boolean>(false);
   const { user } = useAuth();
-
-  // 检查网络连接状态
-  const checkNetworkConnection = async (): Promise<boolean> => {
-    try {
-      const state = await NetInfo.fetch();
-      const isConnected = state.isConnected ?? false;
-      setIsOffline(!isConnected);
-      return isConnected;
-    } catch (error) {
-      console.error('Error checking network connection:', error);
-      return false;
-    }
-  };
-
-  // 监听网络连接状态
-  useEffect(() => {
-    const unsubscribe = NetInfo.addEventListener(state => {
-      const isConnected = state.isConnected ?? false;
-      setIsOffline(!isConnected);
-      
-      // 当网络恢复连接时，尝试同步数据
-      if (isConnected && user) {
-        loadDates();
-      }
-    });
-    
-    // 初始检查网络状态
-    checkNetworkConnection();
-    
-    return () => {
-      unsubscribe();
-    };
-  }, [user]);
 
   // Load dates from storage on app start
   useEffect(() => {
@@ -96,30 +60,6 @@ export function DateProvider({ children }: { children: ReactNode }) {
     
     setIsLoading(true);
     setError(null);
-    
-    // 检查网络连接状态
-    const isConnected = await checkNetworkConnection();
-    
-    // 如果没有网络连接，直接从本地加载数据
-    if (!isConnected) {
-      try {
-        const storedDates = await AsyncStorage.getItem(STORAGE_KEY);
-        if (storedDates) {
-          const parsedDates = JSON.parse(storedDates);
-          setDates(parsedDates);
-          setError('无网络连接，使用本地缓存数据');
-        } else {
-          setError('无网络连接，且无本地缓存数据');
-        }
-        setIsLoading(false);
-        return;
-      } catch (storageError) {
-        console.error('Error loading dates from storage:', storageError);
-        setError('无网络连接，且无法加载本地数据');
-        setIsLoading(false);
-        return;
-      }
-    }
     
     try {
       // 从 Appwrite 数据库加载数据
@@ -218,26 +158,14 @@ export function DateProvider({ children }: { children: ReactNode }) {
     setIsLoading(true);
     setError(null);
     
-    // 检查网络连接状态
-    const isConnected = await checkNetworkConnection();
-    
     // 创建一个唯一ID
-    const uniqueId = isConnected ? ID.unique() : Math.random().toString(36).substr(2, 9);
+    const uniqueId = ID.unique();
     
     // 创建新的日期对象
     const newDate: TrackedDate = {
       ...dateData,
       id: uniqueId,
     };
-    
-    // 如果没有网络连接，直接添加到本地状态
-    if (!isConnected) {
-      setDates(prevDates => [...prevDates, newDate]);
-      await AsyncStorage.setItem(STORAGE_KEY, JSON.stringify([...dates, newDate]));
-      setError('无网络连接，日期已保存到本地');
-      setIsLoading(false);
-      return;
-    }
     
     try {
       // 添加到 Appwrite 数据库
@@ -278,9 +206,6 @@ export function DateProvider({ children }: { children: ReactNode }) {
     setIsLoading(true);
     setError(null);
     
-    // 检查网络连接状态
-    const isConnected = await checkNetworkConnection();
-    
     // 更新本地状态
     setDates(prevDates => prevDates.filter(date => date.id !== id));
     
@@ -291,13 +216,6 @@ export function DateProvider({ children }: { children: ReactNode }) {
       // 更新 AsyncStorage
       const updatedDates = dates.filter(date => date.id !== id);
       await AsyncStorage.setItem(STORAGE_KEY, JSON.stringify(updatedDates));
-    }
-    
-    // 如果没有网络连接，只更新本地状态
-    if (!isConnected) {
-      setError('无网络连接，日期已从本地删除，将在网络恢复后同步到云端');
-      setIsLoading(false);
-      return;
     }
     
     try {
@@ -316,7 +234,7 @@ export function DateProvider({ children }: { children: ReactNode }) {
   };
 
   return (
-    <DateContext.Provider value={{ dates, addDate, removeDate, isLoading, error, refreshDates, isOffline }}>
+    <DateContext.Provider value={{ dates, addDate, removeDate, isLoading, error, refreshDates }}>
       {children}
     </DateContext.Provider>
   );
