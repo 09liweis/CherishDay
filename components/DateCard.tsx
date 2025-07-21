@@ -27,17 +27,6 @@ export function DateCard({ date, onDelete }: DateCardProps) {
     }
   };
 
-  const getTypeLabel = (type: DateType) => {
-    switch (type) {
-      case 'yearly':
-        return 'Yearly';
-      case 'monthly':
-        return 'Monthly';
-      case 'one-time':
-        return 'One-time';
-    }
-  };
-
   const getCardStyle = () => {
     if (isOverdue) return [styles.card, styles.overdueCard];
     if (isToday) return [styles.card, styles.todayCard];
@@ -71,7 +60,7 @@ export function DateCard({ date, onDelete }: DateCardProps) {
           <View style={styles.typeContainer}>
             {getTypeIcon(date.type)}
             <Text style={styles.typeText}>
-              {getTypeLabel(date.type)}
+              {date.type}
             </Text>
           </View>
 
@@ -186,6 +175,7 @@ const styles = StyleSheet.create({
     marginBottom: 8,
   },
   typeText: {
+    textTransform: 'capitalize',
     fontSize: 14,
     color: '#64748b',
     marginLeft: 4,
