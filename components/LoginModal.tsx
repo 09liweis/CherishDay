@@ -9,7 +9,7 @@ import {
   Platform,
   StyleSheet,
 } from 'react-native';
-import { X } from 'lucide-react-native';
+import { X } from '@/constant/icons';
 import LoginScreen from '@/screens/LoginScreen';
 
 interface LoginModalProps {
