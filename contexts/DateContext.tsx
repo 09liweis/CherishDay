@@ -1,7 +1,7 @@
 import React, { createContext, useContext, useState, ReactNode } from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useEffect } from 'react';
-import { Databases, ID, Query } from 'appwrite';
+import { Databases, ID, Query } from 'react-native-appwrite';
 import { client } from '../constant/appwrite';
 import { useAuth } from './AuthContext';
 

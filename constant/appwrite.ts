@@ -1,5 +1,4 @@
-import AsyncStorage from '@react-native-async-storage/async-storage';
-import { Account, Client, ID } from 'appwrite';
+import { Account, Client, ID } from 'react-native-appwrite';
 import Constants from 'expo-constants';
 
 // 从环境变量中获取 Appwrite 配置

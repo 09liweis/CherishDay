@@ -1,6 +1,6 @@
 import React, { createContext, useState, useEffect, useContext } from 'react';
 import { appwriteAuth } from '../constant/appwrite';
-import { Models } from 'appwrite';
+import { Models } from 'react-native-appwrite';
 
 // 定义认证上下文的类型
 interface AuthContextType {
