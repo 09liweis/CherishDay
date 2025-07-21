@@ -1,7 +1,8 @@
 import React, { useState } from 'react';
-import { View, Text, StyleSheet, TextInput, TouchableOpacity, ActivityIndicator, Alert } from 'react-native';
+import { View, Text, StyleSheet, TextInput, TouchableOpacity, ActivityIndicator, Alert, Image } from 'react-native';
 import { useAuth } from '../contexts/AuthContext';
 import { router } from 'expo-router';
+import { FontAwesome } from '@expo/vector-icons';
 
 interface LoginScreenProps {
   isModal?: boolean;
@@ -11,7 +12,7 @@ interface LoginScreenProps {
 const LoginScreen = ({ isModal = false, onLoginSuccess }: LoginScreenProps) => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const { login, isLoading, error } = useAuth();
+  const { login, loginWithGoogle, isLoading, error } = useAuth();
 
   const handleLogin = async () => {
     if (!email || !password) {
@@ -21,6 +22,19 @@ const LoginScreen = ({ isModal = false, onLoginSuccess }: LoginScreenProps) => {
 
     try {
       await login(email, password);
+      if (isModal && onLoginSuccess) {
+        onLoginSuccess();
+      } else {
+        router.replace('/(tabs)');
+      }
+    } catch (err) {
+      // 错误已在 AuthContext 中处理
+    }
+  };
+
+  const handleGoogleLogin = async () => {
+    try {
+      await loginWithGoogle();
       if (isModal && onLoginSuccess) {
         onLoginSuccess();
       } else {
@@ -68,6 +82,27 @@ const LoginScreen = ({ isModal = false, onLoginSuccess }: LoginScreenProps) => {
         )}
       </TouchableOpacity>
       
+      <View style={styles.dividerContainer}>
+        <View style={styles.divider} />
+        <Text style={styles.dividerText}>或</Text>
+        <View style={styles.divider} />
+      </View>
+      
+      <TouchableOpacity 
+        style={styles.googleButton} 
+        onPress={handleGoogleLogin}
+        disabled={isLoading}
+      >
+        {isLoading ? (
+          <ActivityIndicator color="#4285F4" />
+        ) : (
+          <View style={styles.googleButtonContent}>
+            <FontAwesome name="google" size={20} color="#4285F4" />
+            <Text style={styles.googleButtonText}>使用Google登录</Text>
+          </View>
+        )}
+      </TouchableOpacity>
+      
       <TouchableOpacity onPress={navigateToRegister}>
         <Text style={styles.linkText}>
           还没有账号？点击注册
@@ -106,6 +141,42 @@ const styles = StyleSheet.create({
     color: 'white',
     fontWeight: 'bold',
     fontSize: 16,
+  },
+  dividerContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginVertical: 20,
+  },
+  divider: {
+    flex: 1,
+    height: 1,
+    backgroundColor: '#ddd',
+  },
+  dividerText: {
+    marginHorizontal: 10,
+    color: '#666',
+    fontSize: 14,
+  },
+  googleButton: {
+    backgroundColor: '#ffffff',
+    borderRadius: 5,
+    padding: 12,
+    alignItems: 'center',
+    borderWidth: 1,
+    borderColor: '#ddd',
+    flexDirection: 'row',
+    justifyContent: 'center',
+  },
+  googleButtonContent: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  googleButtonText: {
+    color: '#757575',
+    fontWeight: '600',
+    fontSize: 16,
+    marginLeft: 10,
   },
   linkText: {
     color: '#007bff',

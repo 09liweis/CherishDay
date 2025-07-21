@@ -8,6 +8,7 @@ interface AuthContextType {
   isLoading: boolean;
   isAuthenticated: boolean;
   login: (email: string, password: string) => Promise<void>;
+  loginWithGoogle: () => Promise<void>;
   register: (email: string, password: string, name: string) => Promise<void>;
   logout: () => Promise<void>;
   error: string | null;
@@ -71,6 +72,30 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
   };
 
+  // Google登录函数
+  const loginWithGoogle = async () => {
+    try {
+      setIsLoading(true);
+      setError(null);
+      const currentUser = await appwriteAuth.loginWithGoogle();
+      // 确保currentUser不为null才设置用户
+      if (currentUser) {
+        setUser(currentUser);
+      } else {
+        console.error('Google登录成功但获取用户信息失败');
+        setError('Google登录成功但获取用户信息失败，请重试');
+        setUser(null);
+        throw new Error('Google登录成功但获取用户信息失败');
+      }
+    } catch (err: any) {
+      console.error('Google登录失败:', err);
+      setError(err.message || 'Google登录失败，请稍后再试');
+      throw err;
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   // 注册函数
   const register = async (email: string, password: string, name: string) => {
     try {
@@ -120,6 +145,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     isLoading,
     isAuthenticated: !!user,
     login,
+    loginWithGoogle,
     register,
     logout,
     error,

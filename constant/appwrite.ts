@@ -1,5 +1,8 @@
-import { Account, Client, ID } from 'react-native-appwrite';
+import { Account, Client, ID, OAuthProvider } from 'react-native-appwrite';
 import Constants from 'expo-constants';
+import * as WebBrowser from 'expo-web-browser';
+import { Platform } from 'react-native';
+import { makeRedirectUri } from 'expo-auth-session';
 
 // 从环境变量中获取 Appwrite 配置
 // 优先使用 process.env，如果不可用则尝试从 expo-constants 获取
@@ -27,8 +30,68 @@ export const APPWRITE_CONFIG = {
 // 创建账户实例
 export const account = new Account(client);
 
+// 获取当前应用的URL方案，用于OAuth重定向
+const getRedirectURL = () => {
+  // 在开发环境中，使用特定的重定向URL
+  if (__DEV__) {
+    return Platform.OS === 'android'
+      ? 'http://localhost'  // Android开发环境
+      : 'http://localhost';  // iOS开发环境
+  }
+  
+  // 在生产环境中，使用应用的URL方案
+  const scheme = Constants.expoConfig?.scheme;
+  if (!scheme) {
+    throw new Error('应用URL方案未定义。请在app.json中添加scheme字段。');
+  }
+  
+  return `${scheme}://`;
+};
+
 // 用户认证相关函数
 export const appwriteAuth = {
+  // 使用Google登录
+  loginWithGoogle: async () => {
+    try {
+      // 创建深度链接，在所有Expo环境中都能工作
+      // 确保使用localhost作为主机名，以避免成功/失败URL的验证错误
+      const deepLink = new URL(makeRedirectUri({ preferLocalhost: true }));
+      const scheme = `${deepLink.protocol}//`; // 例如 'exp://' 或 'appwrite-callback-<PROJECT_ID>://'
+      
+      // 开始OAuth流程
+      const loginUrl = await account.createOAuth2Token(
+        OAuthProvider.Google,
+        `${deepLink}`,
+        `${deepLink}`
+      );
+      
+      // 打开loginUrl并监听scheme重定向
+      const result = await WebBrowser.openAuthSessionAsync(`${loginUrl}`, scheme);
+      
+      if (result.type === 'success') {
+        // 从OAuth重定向URL中提取凭据
+        const url = new URL(result.url);
+        const secret = url.searchParams.get('secret');
+        const userId = url.searchParams.get('userId');
+        
+        if (secret && userId) {
+          // 使用OAuth凭据创建会话
+          await account.createSession(userId, secret);
+          
+          // 获取当前用户信息
+          return await appwriteAuth.getCurrentUser();
+        } else {
+          throw new Error('未能从重定向URL中获取凭据');
+        }
+      } else {
+        throw new Error('用户取消了登录');
+      }
+    } catch (error) {
+      console.error('Google登录失败:', error);
+      throw error;
+    }
+  },
+  
   // 注册新用户
   register: async (email: string, password: string, name: string) => {
     try {
