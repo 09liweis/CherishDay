@@ -81,15 +81,7 @@ export function DateProvider({ children }: { children: ReactNode }) {
         // 同步到 AsyncStorage 作为备份
         await AsyncStorage.setItem(STORAGE_KEY, JSON.stringify(appwriteDates));
       } else {
-        // 如果 Appwrite 中没有数据，尝试从 AsyncStorage 加载
-        const storedDates = await AsyncStorage.getItem(STORAGE_KEY);
-        if (storedDates) {
-          const parsedDates = JSON.parse(storedDates);
-          setDates(parsedDates);
-          
-          // 不再将 AsyncStorage 中的数据同步到 Appwrite
-          // 这样确保只有 Appwrite -> 本地 的同步，而不是双向同步
-        }
+        setDates([]);
       }
     } catch (error) {
       console.error('Failed to load dates from Appwrite', error);
