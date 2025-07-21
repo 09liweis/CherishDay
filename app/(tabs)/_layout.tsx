@@ -1,6 +1,6 @@
 import { APP_NAME } from '@/constant/text';
 import { Tabs } from 'expo-router';
-import { Calendar, User } from 'lucide-react-native';
+import { Calendar, User } from '@/constant/icons';
 
 export default function TabLayout() {
   return (
