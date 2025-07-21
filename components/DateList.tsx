@@ -1,7 +1,8 @@
 import React from 'react';
 import { View, Alert, StyleSheet, Platform } from 'react-native';
-import { useDates, DateType } from '@/contexts/DateContext';
+import { useDates } from '@/contexts/DateContext';
 import { DateCard } from './DateCard';
+import { getNextOccurrence } from '@/utils/dateUtils';
 
 export function DateList() {
   const { dates, removeDate } = useDates();
@@ -45,33 +46,6 @@ export function DateList() {
       ))}
     </View>
   );
-}
-
-function getNextOccurrence(date: Date, type: DateType): Date {
-  const now = new Date();
-  const originalDate = new Date(date);
-  
-  switch (type) {
-    case 'yearly':
-      let nextYear = new Date(now.getFullYear(), originalDate.getMonth(), originalDate.getDate());
-      if (nextYear <= now) {
-        nextYear = new Date(now.getFullYear() + 1, originalDate.getMonth(), originalDate.getDate());
-      }
-      return nextYear;
-      
-    case 'monthly':
-      let nextMonth = new Date(now.getFullYear(), now.getMonth(), originalDate.getDate());
-      if (nextMonth <= now) {
-        nextMonth = new Date(now.getFullYear(), now.getMonth() + 1, originalDate.getDate());
-      }
-      return nextMonth;
-      
-    case 'one-time':
-      return originalDate;
-      
-    default:
-      return originalDate;
-  }
 }
 
 const styles = StyleSheet.create({
