@@ -39,12 +39,6 @@ export default function HomeScreen() {
                 {dates.length} {dates.length === 1 ? 'date' : 'dates'} tracked
               </Text>
             </View>
-            <TouchableOpacity
-              onPress={() => setIsModalVisible(true)}
-              style={styles.addButton}
-            >
-              <Plus size={24} color="white" strokeWidth={2} />
-            </TouchableOpacity>
           </View>
         </View>
 
@@ -108,6 +102,14 @@ export default function HomeScreen() {
           visible={isModalVisible}
           onClose={() => setIsModalVisible(false)}
         />
+
+        {/* Floating Add Button */}
+        <TouchableOpacity
+          onPress={() => setIsModalVisible(true)}
+          style={styles.floatingAddButton}
+        >
+          <Plus size={24} color="white" strokeWidth={2} />
+        </TouchableOpacity>
       </View>
     </SafeAreaView>
   );
@@ -187,7 +189,10 @@ const styles = StyleSheet.create({
     color: '#64748b',
     marginTop: 4,
   },
-  addButton: {
+  floatingAddButton: {
+    position: 'absolute',
+    bottom: 24,
+    right: 24,
     backgroundColor: '#3b82f6',
     width: 48,
     height: 48,
@@ -199,6 +204,7 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.1,
     shadowRadius: 4,
     elevation: 3,
+    zIndex: 1000,
   },
   scrollView: {
     flex: 1,
