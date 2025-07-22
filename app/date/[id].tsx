@@ -2,7 +2,7 @@ import React from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, ScrollView, Alert, Platform } from 'react-native';
 import { useLocalSearchParams, router, Stack } from 'expo-router';
 import { useDates } from '@/contexts/DateContext';
-import { getDaysUntil, getNextOccurrence } from '@/utils/dateUtils';
+import { formatDate, getDaysUntil, getNextOccurrence } from '@/utils/dateUtils';
 import { Calendar, Clock, RotateCcw, Trash2, ArrowLeft, Cake } from '@/constant/icons';
 import { DateType } from '@/contexts/DateContext';
 
@@ -143,24 +143,14 @@ export default function DateDetailScreen() {
           <View style={styles.infoRow}>
             <Text style={styles.infoLabel}>Original Date</Text>
             <Text style={styles.infoValue}>
-              {new Date(date.date).toLocaleDateString('en-US', {
-                weekday: 'long',
-                year: 'numeric',
-                month: 'long',
-                day: 'numeric'
-              })}
+              {formatDate(new Date(date.date))}
             </Text>
           </View>
 
           <View style={styles.infoRow}>
             <Text style={styles.infoLabel}>Next Occurrence</Text>
             <Text style={styles.infoValue}>
-              {nextOccurrence.toLocaleDateString('en-US', {
-                weekday: 'long',
-                year: 'numeric',
-                month: 'long',
-                day: 'numeric'
-              })}
+              {formatDate(nextOccurrence)}
             </Text>
           </View>
 

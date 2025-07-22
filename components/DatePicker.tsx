@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { View, Text, TouchableOpacity, Platform, StyleSheet } from 'react-native';
 import { Calendar, ChevronDown } from '@/constant/icons';
 import DateTimePicker from '@react-native-community/datetimepicker';
+import { formatDate } from '@/utils/dateUtils';
 
 interface DatePickerProps {
   date: string;
@@ -13,11 +14,7 @@ export function DatePicker({ date, onDateChange }: DatePickerProps) {
 
   const formatInputDate = (date: string) => {
     const dateObj = date ? new Date(date) : new Date();
-    return dateObj.toLocaleDateString('en-US', {
-      month: 'short',
-      day: 'numeric',
-      year: 'numeric'
-    });
+    return formatDate(dateObj);
   };
 
   // Simple web-compatible date picker

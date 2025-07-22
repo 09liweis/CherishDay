@@ -5,7 +5,7 @@ import { useDates } from '../../contexts/DateContext';
 import { LoginModal } from '@/components/LoginModal';
 import { router } from 'expo-router';
 import { Calendar, Clock, RotateCcw, TrendingUp, User, LogOut } from '@/constant/icons';
-import { getNextOccurrence } from '@/utils/dateUtils';
+import { formatDate, getNextOccurrence } from '@/utils/dateUtils';
 
 const ProfileScreen = () => {
   const { user, logout, isLoading } = useAuth();
@@ -137,10 +137,7 @@ const ProfileScreen = () => {
         <Text style={styles.userName}>{user.name}</Text>
         <Text style={styles.userEmail}>{user.email}</Text>
         <Text style={styles.memberSince}>
-          Member since {new Date(user.$createdAt).toLocaleDateString('en-US', { 
-            month: 'long', 
-            year: 'numeric' 
-          })}
+          Member since {formatDate(new Date(user.$createdAt))}
         </Text>
       </View>
 
