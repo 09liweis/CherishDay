@@ -6,30 +6,33 @@ import { DateType } from '@/contexts/DateContext';
  * @param type 日期类型（yearly、monthly或one-time）
  * @returns 下一次事件发生的日期
  */
-export function getNextOccurrence(date: string | Date, type: DateType): Date {
+export function getNextOccurrence(date: string, type: DateType): Date {
   const now = new Date();
-  const originalDate = date instanceof Date ? date : new Date(date);
+  let [year,month,day] = date.split('-');
+  let originalMonth = parseInt(month);
+  originalMonth = originalMonth == 1 ? 12 : originalMonth - 1;
+  const originalDay = parseInt(day);
   
   switch (type) {
     case 'yearly':
-      let nextYear = new Date(now.getFullYear(), originalDate.getMonth(), originalDate.getDate());
+      let nextYear = new Date(now.getFullYear(), originalMonth, originalDay);
       if (nextYear <= now) {
-        nextYear = new Date(now.getFullYear() + 1, originalDate.getMonth(), originalDate.getDate());
+        nextYear = new Date(now.getFullYear() + 1, originalMonth, originalDay);
       }
       return nextYear;
       
     case 'monthly':
-      let nextMonth = new Date(now.getFullYear(), now.getMonth(), originalDate.getDate());
+      let nextMonth = new Date(now.getFullYear(), now.getMonth(), originalDay);
       if (nextMonth <= now) {
-        nextMonth = new Date(now.getFullYear(), now.getMonth() + 1, originalDate.getDate());
+        nextMonth = new Date(now.getFullYear(), now.getMonth() + 1, originalDay);
       }
       return nextMonth;
       
     case 'one-time':
-      return originalDate;
+      return new Date(date);
       
     default:
-      return originalDate;
+      return new Date(date);
   }
 }
 
