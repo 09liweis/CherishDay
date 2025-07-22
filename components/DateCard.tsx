@@ -3,7 +3,7 @@ import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
 import { router } from 'expo-router';
 import { Calendar, Clock, RotateCcw, Trash2, Cake } from '@/constant/icons';
 import { TrackedDate, DateType } from '@/contexts/DateContext';
-import { getNextOccurrence } from '@/utils/dateUtils';
+import { getDaysUntil, getNextOccurrence } from '@/utils/dateUtils';
 
 interface DateCardProps {
   date: TrackedDate;
@@ -103,15 +103,6 @@ export function DateCard({ date, onDelete }: DateCardProps) {
       </View>
     </TouchableOpacity>
   );
-}
-
-function getDaysUntil(date: Date): number {
-  const now = new Date();
-  const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
-  const targetDate = new Date(date.getFullYear(), date.getMonth(), date.getDate());
-  
-  const diffTime = targetDate.getTime() - today.getTime();
-  return Math.ceil(diffTime / (1000 * 60 * 60 * 24));
 }
 
 function getYearsDuration(originalDate: Date): string {

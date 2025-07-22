@@ -2,7 +2,7 @@ import React from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, ScrollView, Alert, Platform } from 'react-native';
 import { useLocalSearchParams, router, Stack } from 'expo-router';
 import { useDates } from '@/contexts/DateContext';
-import { getNextOccurrence } from '@/utils/dateUtils';
+import { getDaysUntil, getNextOccurrence } from '@/utils/dateUtils';
 import { Calendar, Clock, RotateCcw, Trash2, ArrowLeft, Cake } from '@/constant/icons';
 import { DateType } from '@/contexts/DateContext';
 
@@ -208,15 +208,6 @@ export default function DateDetailScreen() {
       </ScrollView>
     </View>
   );
-}
-
-function getDaysUntil(date: Date): number {
-  const now = new Date();
-  const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
-  const targetDate = new Date(date.getFullYear(), date.getMonth(), date.getDate());
-  
-  const diffTime = targetDate.getTime() - today.getTime();
-  return Math.ceil(diffTime / (1000 * 60 * 60 * 24));
 }
 
 const styles = StyleSheet.create({

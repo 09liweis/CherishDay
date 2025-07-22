@@ -32,3 +32,12 @@ export function getNextOccurrence(date: string | Date, type: DateType): Date {
       return originalDate;
   }
 }
+
+export function getDaysUntil(date: Date): number {
+  const now = new Date();
+  const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+  const targetDate = new Date(date.getFullYear(), date.getMonth(), date.getDate());
+  
+  const diffTime = targetDate.getTime() - today.getTime();
+  return Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+}
