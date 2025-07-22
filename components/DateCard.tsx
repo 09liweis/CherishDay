@@ -1,5 +1,6 @@
 import React from 'react';
 import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
+import { router } from 'expo-router';
 import { Calendar, Clock, RotateCcw, Trash2, Cake } from '@/constant/icons';
 import { TrackedDate, DateType } from '@/contexts/DateContext';
 import { getNextOccurrence } from '@/utils/dateUtils';
@@ -56,8 +57,12 @@ export function DateCard({ date, onDelete }: DateCardProps) {
     return [styles.statusBadge, styles.defaultBadge];
   };
 
+  const handleCardPress = () => {
+    router.push(`/date/${date.id}`);
+  };
+
   return (
-    <View style={getCardStyle()}>
+    <TouchableOpacity style={getCardStyle()} onPress={handleCardPress} activeOpacity={0.7}>
       <View style={styles.cardHeader}>
         <View style={styles.titleSection}>
           <Text style={styles.title} numberOfLines={2}>
@@ -96,7 +101,7 @@ export function DateCard({ date, onDelete }: DateCardProps) {
           </View>
         )}
       </View>
-    </View>
+    </TouchableOpacity>
   );
 }
 
