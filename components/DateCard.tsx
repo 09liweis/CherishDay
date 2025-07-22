@@ -19,11 +19,11 @@ export function DateCard({ date, onDelete }: DateCardProps) {
   const getTypeIcon = (type: DateType) => {
     switch (type) {
       case 'yearly':
-        return <RotateCcw size={16} color="#64748b" />;
+        return <RotateCcw size={18} color="#6b7280" />;
       case 'monthly':
-        return <Calendar size={16} color="#64748b" />;
+        return <Calendar size={18} color="#6b7280" />;
       case 'one-time':
-        return <Clock size={16} color="#64748b" />;
+        return <Clock size={18} color="#6b7280" />;
     }
   };
 
@@ -31,7 +31,7 @@ export function DateCard({ date, onDelete }: DateCardProps) {
     if (isOverdue) return [styles.card, styles.overdueCard];
     if (isToday) return [styles.card, styles.todayCard];
     if (isUpcoming) return [styles.card, styles.upcomingCard];
-    return [styles.card, styles.defaultCard];
+    return styles.card;
   };
 
   const getStatusText = () => {
@@ -42,53 +42,63 @@ export function DateCard({ date, onDelete }: DateCardProps) {
     return formatDate(nextOccurrence);
   };
 
-  const getStatusTextStyle = () => {
-    if (isOverdue) return styles.overdueText;
-    if (isToday) return styles.todayText;
-    if (isUpcoming) return styles.upcomingText;
-    return styles.defaultText;
+  const getStatusColor = () => {
+    if (isOverdue) return '#ef4444';
+    if (isToday) return '#f59e0b';
+    if (isUpcoming) return '#3b82f6';
+    return '#6b7280';
+  };
+
+  const getStatusBadgeStyle = () => {
+    if (isOverdue) return [styles.statusBadge, styles.overdueBadge];
+    if (isToday) return [styles.statusBadge, styles.todayBadge];
+    if (isUpcoming) return [styles.statusBadge, styles.upcomingBadge];
+    return [styles.statusBadge, styles.defaultBadge];
   };
 
   return (
     <View style={getCardStyle()}>
-      <View style={styles.cardContent}>
-        <View style={styles.cardMain}>
-          <Text style={styles.title}>
+      <View style={styles.cardHeader}>
+        <View style={styles.titleSection}>
+          <Text style={styles.title} numberOfLines={2}>
             {date.title}
           </Text>
-          
-          <View style={styles.typeContainer}>
+          <View style={styles.typeRow}>
             {getTypeIcon(date.type)}
             <Text style={styles.typeText}>
-              {date.type}
+              {date.type.charAt(0).toUpperCase() + date.type.slice(1).replace('-', ' ')}
             </Text>
           </View>
-
-          <Text style={[styles.statusText, getStatusTextStyle()]}>
-            {getStatusText()}
-          </Text>
-          
-          {date.type === 'yearly' && (
-            <View style={styles.durationContainer}>
-              <Cake size={14} color="#64748b" />
-              <Text style={styles.durationText}>
-                {getYearsDuration(new Date(date.date))}
-              </Text>
-            </View>
-          )}
         </View>
-
+        
         <TouchableOpacity
           onPress={onDelete}
           style={styles.deleteButton}
+          hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
         >
-          <Trash2 size={16} color="#64748b" />
+          <Trash2 size={18} color="#9ca3af" />
         </TouchableOpacity>
+      </View>
+
+      <View style={styles.cardFooter}>
+        <View style={getStatusBadgeStyle()}>
+          <Text style={[styles.statusText, { color: getStatusColor() }]}>
+            {getStatusText()}
+          </Text>
+        </View>
+        
+        {date.type === 'yearly' && (
+          <View style={styles.durationBadge}>
+            <Cake size={14} color="#6b7280" />
+            <Text style={styles.durationText}>
+              {getYearsDuration(new Date(date.date))}
+            </Text>
+          </View>
+        )}
       </View>
     </View>
   );
 }
-
 
 function getDaysUntil(date: Date): number {
   const now = new Date();
@@ -125,94 +135,111 @@ function formatDate(date: Date): string {
 
 const styles = StyleSheet.create({
   card: {
-    borderRadius: 12,
-    padding: 16,
-    marginBottom: 12,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.05,
-    shadowRadius: 2,
-    elevation: 1,
-  },
-  defaultCard: {
-    borderWidth: 1,
-    borderColor: '#e2e8f0',
     backgroundColor: '#ffffff',
+    borderRadius: 16,
+    padding: 20,
+    marginBottom: 12,
+    borderWidth: 1,
+    borderColor: '#f1f5f9',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.04,
+    shadowRadius: 8,
+    elevation: 2,
   },
   overdueCard: {
-    borderWidth: 1,
-    borderColor: '#fecaca',
-    backgroundColor: '#fef2f2',
+    borderLeftWidth: 4,
+    borderLeftColor: '#ef4444',
+    backgroundColor: '#fefefe',
   },
   todayCard: {
-    borderWidth: 1,
-    borderColor: '#fed7aa',
-    backgroundColor: '#fff7ed',
+    borderLeftWidth: 4,
+    borderLeftColor: '#f59e0b',
+    backgroundColor: '#fefefe',
   },
   upcomingCard: {
-    borderWidth: 1,
-    borderColor: '#fde68a',
-    backgroundColor: '#fffbeb',
+    borderLeftWidth: 4,
+    borderLeftColor: '#3b82f6',
+    backgroundColor: '#fefefe',
   },
-  cardContent: {
+  cardHeader: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'flex-start',
+    marginBottom: 16,
   },
-  cardMain: {
+  titleSection: {
     flex: 1,
     marginRight: 12,
   },
   title: {
     fontSize: 18,
     fontWeight: '600',
-    color: '#0f172a',
-    marginBottom: 4,
-  },
-  typeContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
+    color: '#111827',
+    lineHeight: 24,
     marginBottom: 8,
   },
+  typeRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
   typeText: {
-    textTransform: 'capitalize',
     fontSize: 14,
-    color: '#64748b',
-    marginLeft: 4,
+    color: '#6b7280',
+    marginLeft: 6,
+    fontWeight: '500',
+  },
+  deleteButton: {
+    width: 36,
+    height: 36,
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderRadius: 18,
+    backgroundColor: '#f9fafb',
+    borderWidth: 1,
+    borderColor: '#f3f4f6',
+  },
+  cardFooter: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+  },
+  statusBadge: {
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    borderRadius: 20,
+    flex: 1,
+    marginRight: 8,
+  },
+  defaultBadge: {
+    backgroundColor: '#f8fafc',
+  },
+  overdueBadge: {
+    backgroundColor: '#fef2f2',
+  },
+  todayBadge: {
+    backgroundColor: '#fffbeb',
+  },
+  upcomingBadge: {
+    backgroundColor: '#eff6ff',
   },
   statusText: {
     fontSize: 14,
-    fontWeight: '500',
+    fontWeight: '600',
+    textAlign: 'center',
   },
-  defaultText: {
-    color: '#64748b',
-  },
-  overdueText: {
-    color: '#dc2626',
-  },
-  todayText: {
-    color: '#ea580c',
-  },
-  upcomingText: {
-    color: '#d97706',
-  },
-  deleteButton: {
-    width: 32,
-    height: 32,
-    alignItems: 'center',
-    justifyContent: 'center',
-    borderRadius: 8,
-    backgroundColor: '#f1f5f9',
-  },
-  durationContainer: {
+  durationBadge: {
     flexDirection: 'row',
     alignItems: 'center',
-    marginTop: 4,
+    backgroundColor: '#f8fafc',
+    paddingHorizontal: 10,
+    paddingVertical: 6,
+    borderRadius: 16,
   },
   durationText: {
     fontSize: 13,
-    color: '#64748b',
+    color: '#6b7280',
     marginLeft: 4,
-    fontStyle: 'italic',
+    fontWeight: '500',
   },
 });
