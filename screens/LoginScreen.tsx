@@ -13,7 +13,7 @@ const LoginScreen = ({ isModal = false, onLoginSuccess }: LoginScreenProps) => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
-  const { login, loginWithGoogle, isLoading, error } = useAuth();
+  const { login, loginWithGoogle, loginWithGithub, isLoading, error } = useAuth();
 
   const handleLogin = async () => {
     if (!email || !password) {
@@ -36,6 +36,19 @@ const LoginScreen = ({ isModal = false, onLoginSuccess }: LoginScreenProps) => {
   const handleGoogleLogin = async () => {
     try {
       await loginWithGoogle();
+      if (isModal && onLoginSuccess) {
+        onLoginSuccess();
+      } else {
+        router.replace('/(tabs)');
+      }
+    } catch (err) {
+      // Error handled in AuthContext
+    }
+  };
+
+  const handleGithubLogin = async () => {
+    try {
+      await loginWithGithub();
       if (isModal && onLoginSuccess) {
         onLoginSuccess();
       } else {
@@ -131,23 +144,44 @@ const LoginScreen = ({ isModal = false, onLoginSuccess }: LoginScreenProps) => {
         <View style={styles.divider} />
       </View>
       
-      {/* Google Login Button */}
-      <TouchableOpacity 
-        style={styles.googleButton} 
-        onPress={handleGoogleLogin}
-        disabled={isLoading}
-      >
-        {isLoading ? (
-          <ActivityIndicator color="#4285F4" size="small" />
-        ) : (
-          <View style={styles.googleButtonContent}>
-            <View style={styles.googleIcon}>
-              <Text style={styles.googleIconText}>G</Text>
+      {/* OAuth Buttons */}
+      <View style={styles.oauthContainer}>
+        {/* Google Login Button */}
+        <TouchableOpacity 
+          style={styles.googleButton} 
+          onPress={handleGoogleLogin}
+          disabled={isLoading}
+        >
+          {isLoading ? (
+            <ActivityIndicator color="#4285F4" size="small" />
+          ) : (
+            <View style={styles.googleButtonContent}>
+              <View style={styles.googleIcon}>
+                <Text style={styles.googleIconText}>G</Text>
+              </View>
+              <Text style={styles.googleButtonText}>Continue with Google</Text>
             </View>
-            <Text style={styles.googleButtonText}>Continue with Google</Text>
-          </View>
-        )}
-      </TouchableOpacity>
+          )}
+        </TouchableOpacity>
+        
+        {/* GitHub Login Button */}
+        <TouchableOpacity 
+          style={styles.githubButton} 
+          onPress={handleGithubLogin}
+          disabled={isLoading}
+        >
+          {isLoading ? (
+            <ActivityIndicator color="#ffffff" size="small" />
+          ) : (
+            <View style={styles.githubButtonContent}>
+              <View style={styles.githubIcon}>
+                <Text style={styles.githubIconText}>⚡</Text>
+              </View>
+              <Text style={styles.githubButtonText}>Continue with GitHub</Text>
+            </View>
+          )}
+        </TouchableOpacity>
+      </View>
       
       {/* Register Link */}
       <TouchableOpacity onPress={navigateToRegister} style={styles.registerContainer}>
@@ -264,6 +298,9 @@ const styles = StyleSheet.create({
     fontSize: 14,
     fontWeight: '500',
   },
+  oauthContainer: {
+    gap: 12,
+  },
   googleButton: {
     backgroundColor: '#ffffff',
     borderWidth: 1,
@@ -298,6 +335,41 @@ const styles = StyleSheet.create({
   },
   googleButtonText: {
     color: '#374151',
+    fontSize: 16,
+    fontWeight: '500',
+  },
+  githubButton: {
+    backgroundColor: '#24292e',
+    borderRadius: 12,
+    paddingVertical: 16,
+    alignItems: 'center',
+    justifyContent: 'center',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.1,
+    shadowRadius: 2,
+    elevation: 1,
+  },
+  githubButtonContent: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  githubIcon: {
+    width: 20,
+    height: 20,
+    borderRadius: 10,
+    backgroundColor: '#ffffff',
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginRight: 12,
+  },
+  githubIconText: {
+    color: '#24292e',
+    fontSize: 12,
+    fontWeight: '700',
+  },
+  githubButtonText: {
+    color: '#ffffff',
     fontSize: 16,
     fontWeight: '500',
   },

@@ -9,6 +9,7 @@ interface AuthContextType {
   isAuthenticated: boolean;
   login: (email: string, password: string) => Promise<void>;
   loginWithGoogle: () => Promise<void>;
+  loginWithGithub: () => Promise<void>;
   register: (email: string, password: string, name: string) => Promise<void>;
   logout: () => Promise<void>;
   error: string | null;
@@ -96,6 +97,30 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
   };
 
+  // GitHub登录函数
+  const loginWithGithub = async () => {
+    try {
+      setIsLoading(true);
+      setError(null);
+      const currentUser = await appwriteAuth.loginWithGithub();
+      // 确保currentUser不为null才设置用户
+      if (currentUser) {
+        setUser(currentUser);
+      } else {
+        console.error('GitHub登录成功但获取用户信息失败');
+        setError('GitHub登录成功但获取用户信息失败，请重试');
+        setUser(null);
+        throw new Error('GitHub登录成功但获取用户信息失败');
+      }
+    } catch (err: any) {
+      console.error('GitHub登录失败:', err);
+      setError(err.message || 'GitHub登录失败，请稍后再试');
+      throw err;
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   // 注册函数
   const register = async (email: string, password: string, name: string) => {
     try {
@@ -146,6 +171,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     isAuthenticated: !!user,
     login,
     loginWithGoogle,
+    loginWithGithub,
     register,
     logout,
     error,
