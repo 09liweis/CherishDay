@@ -9,9 +9,12 @@ import { DateType } from '@/contexts/DateContext';
 export function getNextOccurrence(date: string, type: DateType): Date {
   const now = new Date();
   let [year,month,day] = date.split('-');
+  const originalYear = parseInt(year);
   let originalMonth = parseInt(month);
   originalMonth = originalMonth == 1 ? 12 : originalMonth - 1;
   const originalDay = parseInt(day);
+
+  const originalDate = new Date(originalYear, originalMonth, originalDay);
   
   switch (type) {
     case 'yearly':
@@ -29,10 +32,10 @@ export function getNextOccurrence(date: string, type: DateType): Date {
       return nextMonth;
       
     case 'one-time':
-      return new Date(date);
+      return originalDate;
       
     default:
-      return new Date(date);
+      return originalDate;
   }
 }
 
