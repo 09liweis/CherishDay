@@ -1,11 +1,18 @@
 import React from 'react';
 import { View, Alert, StyleSheet, Platform } from 'react-native';
-import { useDates } from '@/contexts/DateContext';
+import { useDates, TrackedDate } from '@/contexts/DateContext';
 import { DateCard } from './DateCard';
 import { getNextOccurrence } from '@/utils/dateUtils';
 
-export function DateList() {
-  const { dates, removeDate } = useDates();
+interface DateListProps {
+  dates?: TrackedDate[];
+}
+
+export function DateList({ dates: propDates }: DateListProps) {
+  const { dates: contextDates, removeDate } = useDates();
+  
+  // Use prop dates if provided, otherwise use context dates
+  const dates = propDates || contextDates;
 
   const sortedDates = [...dates].sort((a, b) => {
     const aNext = getNextOccurrence(a.date, a.type);

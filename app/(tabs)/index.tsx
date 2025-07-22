@@ -11,15 +11,33 @@ import {
   Alert
 } from 'react-native';
 import { Calendar, Plus, AlertCircle } from '@/constant/icons';
-import { useDates } from '@/contexts/DateContext';
+import { useDates, DateType } from '@/contexts/DateContext';
 import { DateList } from '@/components/DateList';
 import { AddDateModal } from '@/components/AddDateModal';
 import { APP_NAME } from '@/constant/text';
 
+interface FilterOption {
+  value: DateType | 'all';
+  label: string;
+}
+
+const filterOptions: FilterOption[] = [
+  { value: 'all', label: 'All' },
+  { value: 'yearly', label: 'Yearly' },
+  { value: 'monthly', label: 'Monthly' },
+  { value: 'one-time', label: 'One-time' },
+];
+
 export default function HomeScreen() {
   const [isModalVisible, setIsModalVisible] = useState(false);
   const [refreshing, setRefreshing] = useState(false);
+  const [selectedFilter, setSelectedFilter] = useState<DateType | 'all'>('all');
   const { dates, isLoading, error, refreshDates } = useDates();
+  
+  // Filter dates based on selected filter
+  const filteredDates = selectedFilter === 'all' 
+    ? dates 
+    : dates.filter(date => date.type === selectedFilter);
   
   const onRefresh = async () => {
     setRefreshing(true);
@@ -36,9 +54,36 @@ export default function HomeScreen() {
             <View style={styles.headerText}>
               <Text style={styles.title}>{APP_NAME}</Text>
               <Text style={styles.subtitle}>
-                {dates.length} {dates.length === 1 ? 'date' : 'dates'} tracked
+                {filteredDates.length} of {dates.length} {dates.length === 1 ? 'date' : 'dates'} shown
               </Text>
             </View>
+          </View>
+          
+          {/* Filter Tabs */}
+          <View style={styles.filterContainer}>
+            <ScrollView 
+              horizontal 
+              showsHorizontalScrollIndicator={false}
+              contentContainerStyle={styles.filterScrollContent}
+            >
+              {filterOptions.map((option) => (
+                <TouchableOpacity
+                  key={option.value}
+                  onPress={() => setSelectedFilter(option.value)}
+                  style={[
+                    styles.filterTab,
+                    selectedFilter === option.value ? styles.filterTabActive : styles.filterTabInactive
+                  ]}
+                >
+                  <Text style={[
+                    styles.filterTabText,
+                    selectedFilter === option.value ? styles.filterTabTextActive : styles.filterTabTextInactive
+                  ]}>
+                    {option.label}
+                  </Text>
+                </TouchableOpacity>
+              ))}
+            </ScrollView>
           </View>
         </View>
 
@@ -92,8 +137,18 @@ export default function HomeScreen() {
                 <Text style={styles.emptyButtonText}>Add Your First Date</Text>
               </TouchableOpacity>
             </View>
+          ) : filteredDates.length === 0 ? (
+            <View style={styles.emptyState}>
+              <View style={styles.emptyIcon}>
+                <Calendar size={32} color="#64748b" />
+              </View>
+              <Text style={styles.emptyTitle}>No {selectedFilter} dates</Text>
+              <Text style={styles.emptyDescription}>
+                No dates match the selected filter. Try selecting a different filter or add a new date.
+              </Text>
+            </View>
           ) : (
-            <DateList />
+            <DateList dates={filteredDates} />
           )}
         </ScrollView>
 
@@ -178,6 +233,36 @@ const styles = StyleSheet.create({
   },
   headerText: {
     flex: 1,
+  },
+  filterContainer: {
+    marginTop: 16,
+  },
+  filterScrollContent: {
+    paddingHorizontal: 4,
+  },
+  filterTab: {
+    paddingHorizontal: 16,
+    paddingVertical: 8,
+    borderRadius: 20,
+    marginHorizontal: 4,
+    minWidth: 60,
+    alignItems: 'center',
+  },
+  filterTabActive: {
+    backgroundColor: '#3b82f6',
+  },
+  filterTabInactive: {
+    backgroundColor: '#f1f5f9',
+  },
+  filterTabText: {
+    fontSize: 14,
+    fontWeight: '500',
+  },
+  filterTabTextActive: {
+    color: '#ffffff',
+  },
+  filterTabTextInactive: {
+    color: '#64748b',
   },
   title: {
     fontSize: 24,
