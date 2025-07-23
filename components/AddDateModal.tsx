@@ -10,8 +10,10 @@ import {
   Platform,
   StyleSheet,
   ActivityIndicator,
-  Alert
+  Alert,
+  Switch
 } from 'react-native';
+import * as Notifications from 'expo-notifications';
 import { X, AlertCircle } from '@/constant/icons';
 import { useDates, DateType } from '@/contexts/DateContext';
 import { DatePicker } from './DatePicker';
@@ -27,6 +29,7 @@ export function AddDateModal({ visible, onClose }: AddDateModalProps) {
   const [title, setTitle] = useState('');
   const [selectedDate, setSelectedDate] = useState('');
   const [type, setType] = useState<DateType>('one-time');
+  const [enableNotification, setEnableNotification] = useState(false);
   const [errors, setErrors] = useState<{ title?: string; date?: string }>({});
 
   const resetForm = () => {
@@ -58,6 +61,19 @@ export function AddDateModal({ visible, onClose }: AddDateModalProps) {
         date: selectedDate,
         type,
       });
+
+      if (enableNotification) {
+        await Notifications.scheduleNotificationAsync({
+          content: {
+            title: 'Reminder',
+            body: `Don't forget: ${title.trim()} is coming up!`,
+            sound: true,
+          },
+          trigger: {
+            date: new Date(selectedDate),
+          },
+        });
+      }
       
       resetForm();
       onClose();
@@ -151,6 +167,19 @@ export function AddDateModal({ visible, onClose }: AddDateModalProps) {
                     <TypeSelector
                       selectedType={type}
                       onTypeChange={setType}
+                    />
+                  </View>
+
+                  {/* Notification Toggle */}
+                  <View style={styles.field}>
+                    <Text style={styles.label}>
+                      Enable Reminder
+                    </Text>
+                    <Switch
+                      value={enableNotification}
+                      onValueChange={setEnableNotification}
+                      trackColor={{ false: '#d1d5db', true: '#3b82f6' }}
+                      thumbColor={enableNotification ? '#ffffff' : '#ffffff'}
                     />
                   </View>
                 </View>
