@@ -1,14 +1,17 @@
 import React from 'react';
-import { View, Alert, StyleSheet, Platform } from 'react-native';
+import { View, Alert, StyleSheet, Platform, Dimensions } from 'react-native';
 import { useDates, TrackedDate } from '@/contexts/DateContext';
 import { DateCard } from './DateCard';
 import { getNextOccurrence } from '@/utils/dateUtils';
 
+const { width } = Dimensions.get('window');
+
 interface DateListProps {
   dates?: TrackedDate[];
+  isGridView?: boolean;
 }
 
-export function DateList({ dates: propDates }: DateListProps) {
+export function DateList({ dates: propDates, isGridView = false }: DateListProps) {
   const { dates: contextDates, removeDate } = useDates();
   
   // Use prop dates if provided, otherwise use context dates
@@ -43,11 +46,12 @@ export function DateList({ dates: propDates }: DateListProps) {
   };
 
   return (
-    <View style={styles.container}>
+    <View style={[styles.container, isGridView && styles.gridContainer]}>
       {sortedDates.map((date) => (
         <DateCard
           key={date.id}
           date={date}
+          isGridView={isGridView}
           onDelete={() => handleDeleteDate(date.id, date.title)}
         />
       ))}
@@ -59,5 +63,11 @@ const styles = StyleSheet.create({
   container: {
     paddingHorizontal: 24,
     paddingVertical: 16,
+  },
+  gridContainer: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    justifyContent: 'space-between',
+    paddingHorizontal: 16,
   },
 });

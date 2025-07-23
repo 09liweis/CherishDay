@@ -8,13 +8,16 @@ import {
   StyleSheet, 
   ActivityIndicator, 
   RefreshControl,
-  Alert
+  Alert,
+  Dimensions
 } from 'react-native';
-import { Calendar, Plus, AlertCircle } from '@/constant/icons';
+import { Calendar, Plus, AlertCircle, LayoutGrid, List } from '@/constant/icons';
 import { useDates, DateType } from '@/contexts/DateContext';
 import { DateList } from '@/components/DateList';
 import { AddDateModal } from '@/components/AddDateModal';
 import { APP_NAME } from '@/constant/text';
+
+const { width } = Dimensions.get('window');
 
 interface FilterOption {
   value: DateType | 'all';
@@ -32,6 +35,7 @@ export default function HomeScreen() {
   const [isModalVisible, setIsModalVisible] = useState(false);
   const [refreshing, setRefreshing] = useState(false);
   const [selectedFilter, setSelectedFilter] = useState<DateType | 'all'>('all');
+  const [isGridView, setIsGridView] = useState(false);
   const { dates, isLoading, error, refreshDates } = useDates();
   
   // Filter dates based on selected filter
@@ -57,6 +61,16 @@ export default function HomeScreen() {
                 {filteredDates.length} of {dates.length} {dates.length === 1 ? 'date' : 'dates'} shown
               </Text>
             </View>
+            <TouchableOpacity
+              onPress={() => setIsGridView(!isGridView)}
+              style={styles.viewToggle}
+            >
+              {isGridView ? (
+                <List size={24} color="#64748b" />
+              ) : (
+                <LayoutGrid size={24} color="#64748b" />
+              )}
+            </TouchableOpacity>
           </View>
           
           {/* Filter Tabs */}
@@ -148,7 +162,7 @@ export default function HomeScreen() {
               </Text>
             </View>
           ) : (
-            <DateList dates={filteredDates} />
+            <DateList dates={filteredDates} isGridView={isGridView} />
           )}
         </ScrollView>
 
@@ -233,6 +247,15 @@ const styles = StyleSheet.create({
   },
   headerText: {
     flex: 1,
+  },
+  viewToggle: {
+    width: 44,
+    height: 44,
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderRadius: 22,
+    backgroundColor: '#f8fafc',
+    marginLeft: 16,
   },
   filterContainer: {
     marginTop: 16,
