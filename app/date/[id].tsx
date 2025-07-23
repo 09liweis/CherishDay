@@ -1,12 +1,31 @@
 import React from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, ScrollView, Alert, Platform, Dimensions } from 'react-native';
+import Animated, { 
+  FadeInDown, 
+  FadeInUp, 
+  FadeIn,
+  SlideInLeft,
+  SlideInRight,
+  BounceIn,
+  ZoomIn,
+  useSharedValue,
+  useAnimatedStyle,
+  withSpring,
+  withTiming,
+  withSequence,
+  runOnJS
+} from 'react-native-reanimated';
 import { useLocalSearchParams, router, Stack } from 'expo-router';
 import { useDates } from '@/contexts/DateContext';
 import { formatDate, getDaysUntil, getNextOccurrence, getYearsDuration } from '@/utils/dateUtils';
 import { Calendar, Clock, RotateCcw, Trash2, ArrowLeft, Cake } from '@/constant/icons';
-import { DateType } from '@/contexts/DateContext';
+import { DateType } from '@/types/date';
 
 const { width } = Dimensions.get('window');
+
+// Animated components
+const AnimatedTouchableOpacity = Animated.createAnimatedComponent(TouchableOpacity);
+const AnimatedScrollView = Animated.createAnimatedComponent(ScrollView);
 
 export default function DateDetailScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
@@ -14,16 +33,59 @@ export default function DateDetailScreen() {
   
   const date = dates.find(d => d.id === id);
 
+  // Animation values
+  const headerScale = useSharedValue(0.9);
+  const deleteButtonScale = useSharedValue(1);
+  const countdownPulse = useSharedValue(1);
+
+  // Initialize animations
+  React.useEffect(() => {
+    headerScale.value = withSpring(1, { damping: 15, stiffness: 100 });
+    
+    // Pulse animation for countdown circle
+    const startPulse = () => {
+      countdownPulse.value = withSequence(
+        withTiming(1.05, { duration: 1000 }),
+        withTiming(1, { duration: 1000 })
+      );
+    };
+    
+    const interval = setInterval(startPulse, 2000);
+    return () => clearInterval(interval);
+  }, []);
+
+  // Header animation styles
+  const headerAnimatedStyle = useAnimatedStyle(() => ({
+    transform: [{ scale: headerScale.value }],
+  }));
+
+  // Delete button animation styles
+  const deleteButtonAnimatedStyle = useAnimatedStyle(() => ({
+    transform: [{ scale: deleteButtonScale.value }],
+  }));
+
+  // Countdown pulse animation styles
+  const countdownAnimatedStyle = useAnimatedStyle(() => ({
+    transform: [{ scale: countdownPulse.value }],
+  }));
+
   if (!date) {
     return (
       <View style={styles.container}>
         <Stack.Screen options={{ headerShown: false }} />
-        <View style={styles.notFoundContainer}>
+        <Animated.View 
+          style={styles.notFoundContainer}
+          entering={FadeIn.duration(600)}
+        >
           <Text style={styles.notFoundText}>Date not found</Text>
-          <TouchableOpacity onPress={() => router.back()} style={styles.backButton}>
+          <AnimatedTouchableOpacity 
+            onPress={() => router.back()} 
+            style={styles.backButton}
+            entering={BounceIn.delay(300)}
+          >
             <Text style={styles.backButtonText}>Go Back</Text>
-          </TouchableOpacity>
-        </View>
+          </AnimatedTouchableOpacity>
+        </Animated.View>
       </View>
     );
   }
@@ -60,7 +122,13 @@ export default function DateDetailScreen() {
     return '#6b7280';
   };
 
+  // Handle delete with animation
   const handleDelete = () => {
+    deleteButtonScale.value = withSequence(
+      withTiming(0.8, { duration: 100 }),
+      withTiming(1, { duration: 100 })
+    );
+    
     if (Platform.OS === 'web') {
       if (confirm(`Are you sure you want to delete "${date.title}"?`)) {
         removeDate(date.id);
@@ -91,143 +159,328 @@ export default function DateDetailScreen() {
       <Stack.Screen options={{ headerShown: false }} />
       
       {/* Custom Header */}
-      <View style={styles.header}>
-        <TouchableOpacity onPress={() => router.back()} style={styles.headerButton}>
+      <Animated.View 
+        style={[styles.header, headerAnimatedStyle]}
+        entering={SlideInLeft.duration(500)}
+      >
+        <AnimatedTouchableOpacity 
+          onPress={() => router.back()} 
+          style={styles.headerButton}
+          entering={FadeIn.delay(200)}
+        >
           <ArrowLeft size={24} color="#0f172a" />
-        </TouchableOpacity>
-        <Text style={styles.headerTitle}>Date Details</Text>
-        <TouchableOpacity onPress={handleDelete} style={styles.headerButton}>
+        </AnimatedTouchableOpacity>
+        <Animated.Text 
+          style={styles.headerTitle}
+          entering={FadeIn.delay(300)}
+        >
+          Date Details
+        </Animated.Text>
+        <AnimatedTouchableOpacity 
+          onPress={handleDelete} 
+          style={[styles.headerButton, deleteButtonAnimatedStyle]}
+          entering={FadeIn.delay(400)}
+        >
           <Trash2 size={24} color="#ef4444" />
-        </TouchableOpacity>
-      </View>
+        </AnimatedTouchableOpacity>
+      </Animated.View>
 
-      <ScrollView style={styles.content} showsVerticalScrollIndicator={false}>
+      <AnimatedScrollView 
+        style={styles.content} 
+        showsVerticalScrollIndicator={false}
+        entering={FadeInUp.delay(300).duration(600)}
+      >
         {/* Hero Section */}
-        <View style={styles.heroSection}>
-          <View style={styles.heroBackground}>
+        <Animated.View 
+          style={styles.heroSection}
+          entering={FadeInDown.delay(400).duration(800)}
+        >
+          <Animated.View 
+            style={styles.heroBackground}
+            entering={SlideInRight.delay(500).duration(600)}
+          >
             <View style={styles.heroContent}>
-              <Text style={styles.heroTitle}>{date.title}</Text>
-              <View style={styles.heroDateContainer}>
-                <Text style={styles.heroDate}>{formatDate(nextOccurrence)}</Text>
-                <View style={styles.heroTypeTag}>
+              <Animated.Text 
+                style={styles.heroTitle}
+                entering={FadeIn.delay(600).duration(500)}
+              >
+                {date.title}
+              </Animated.Text>
+              <Animated.View 
+                style={styles.heroDateContainer}
+                entering={FadeIn.delay(700).duration(500)}
+              >
+                <Animated.Text 
+                  style={styles.heroDate}
+                  entering={FadeIn.delay(800).duration(400)}
+                >
+                  {formatDate(nextOccurrence)}
+                </Animated.Text>
+                <Animated.View 
+                  style={styles.heroTypeTag}
+                  entering={BounceIn.delay(900)}
+                >
                   {getTypeIcon(date.type)}
-                  <Text style={styles.heroTypeText}>
+                  <Animated.Text 
+                    style={styles.heroTypeText}
+                    entering={FadeIn.delay(1000)}
+                  >
                     {date.type.charAt(0).toUpperCase() + date.type.slice(1).replace('-', ' ')}
-                  </Text>
-                </View>
-              </View>
+                  </Animated.Text>
+                </Animated.View>
+              </Animated.View>
             </View>
-          </View>
+          </Animated.View>
           
           {/* Countdown Circle */}
-          <View style={styles.countdownContainer}>
-            <View style={[styles.countdownCircle, { borderColor: getStatusColor() }]}>
-              <Text style={[styles.countdownNumber, { color: getStatusColor() }]}>
+          <Animated.View 
+            style={styles.countdownContainer}
+            entering={ZoomIn.delay(800).duration(600)}
+          >
+            <Animated.View 
+              style={[styles.countdownCircle, { borderColor: getStatusColor() }, countdownAnimatedStyle]}
+            >
+              <Animated.Text 
+                style={[styles.countdownNumber, { color: getStatusColor() }]}
+                entering={BounceIn.delay(1000)}
+              >
                 {Math.abs(daysUntil)}
-              </Text>
-              <Text style={[styles.countdownLabel, { color: getStatusColor() }]}>
+              </Animated.Text>
+              <Animated.Text 
+                style={[styles.countdownLabel, { color: getStatusColor() }]}
+                entering={FadeIn.delay(1100)}
+              >
                 {isOverdue ? 'OVERDUE' : isToday ? 'TODAY' : 'DAYS'}
-              </Text>
-            </View>
-            <Text style={[styles.countdownStatus, { color: getStatusColor() }]}>
+              </Animated.Text>
+            </Animated.View>
+            <Animated.Text 
+              style={[styles.countdownStatus, { color: getStatusColor() }]}
+              entering={FadeIn.delay(1200)}
+            >
               {getStatusText()}
-            </Text>
-          </View>
-        </View>
+            </Animated.Text>
+          </Animated.View>
+        </Animated.View>
 
         {/* Info Cards Grid */}
-        <View style={styles.infoGrid}>
-          <View style={styles.infoCard}>
-            <View style={styles.infoCardHeader}>
+        <Animated.View 
+          style={styles.infoGrid}
+          entering={FadeInUp.delay(600).duration(600)}
+        >
+          <Animated.View 
+            style={styles.infoCard}
+            entering={SlideInLeft.delay(700).duration(500)}
+          >
+            <Animated.View 
+              style={styles.infoCardHeader}
+              entering={FadeIn.delay(800)}
+            >
               <Calendar size={20} color="#3b82f6" />
-              <Text style={styles.infoCardTitle}>Original Date</Text>
-            </View>
-            <Text style={styles.infoCardValue}>
+              <Animated.Text 
+                style={styles.infoCardTitle}
+                entering={FadeIn.delay(850)}
+              >
+                Original Date
+              </Animated.Text>
+            </Animated.View>
+            <Animated.Text 
+              style={styles.infoCardValue}
+              entering={FadeIn.delay(900)}
+            >
               {formatDate(new Date(date.date))}
-            </Text>
-          </View>
+            </Animated.Text>
+          </Animated.View>
           
-          <View style={styles.infoCard}>
-            <View style={styles.infoCardHeader}>
+          <Animated.View 
+            style={styles.infoCard}
+            entering={SlideInRight.delay(750).duration(500)}
+          >
+            <Animated.View 
+              style={styles.infoCardHeader}
+              entering={FadeIn.delay(850)}
+            >
               <Clock size={20} color="#10b981" />
-              <Text style={styles.infoCardTitle}>Next Event</Text>
-            </View>
-            <Text style={styles.infoCardValue}>
+              <Animated.Text 
+                style={styles.infoCardTitle}
+                entering={FadeIn.delay(900)}
+              >
+                Next Event
+              </Animated.Text>
+            </Animated.View>
+            <Animated.Text 
+              style={styles.infoCardValue}
+              entering={FadeIn.delay(950)}
+            >
               {formatDate(nextOccurrence)}
-            </Text>
-          </View>
+            </Animated.Text>
+          </Animated.View>
           
           {date.type === 'yearly' && (
-            <View style={styles.infoCard}>
-              <View style={styles.infoCardHeader}>
+            <Animated.View 
+              style={styles.infoCard}
+              entering={SlideInLeft.delay(800).duration(500)}
+            >
+              <Animated.View 
+                style={styles.infoCardHeader}
+                entering={FadeIn.delay(900)}
+              >
                 <Cake size={20} color="#f59e0b" />
-                <Text style={styles.infoCardTitle}>Duration</Text>
-              </View>
-              <Text style={styles.infoCardValue}>
+                <Animated.Text 
+                  style={styles.infoCardTitle}
+                  entering={FadeIn.delay(950)}
+                >
+                  Duration
+                </Animated.Text>
+              </Animated.View>
+              <Animated.Text 
+                style={styles.infoCardValue}
+                entering={FadeIn.delay(1000)}
+              >
                 {getYearsDuration(new Date(date.date))}
-              </Text>
-            </View>
+              </Animated.Text>
+            </Animated.View>
           )}
           
-          <View style={styles.infoCard}>
-            <View style={styles.infoCardHeader}>
+          <Animated.View 
+            style={styles.infoCard}
+            entering={SlideInRight.delay(850).duration(500)}
+          >
+            <Animated.View 
+              style={styles.infoCardHeader}
+              entering={FadeIn.delay(950)}
+            >
               <RotateCcw size={20} color="#8b5cf6" />
-              <Text style={styles.infoCardTitle}>Recurrence</Text>
-            </View>
-            <Text style={styles.infoCardValue}>
+              <Animated.Text 
+                style={styles.infoCardTitle}
+                entering={FadeIn.delay(1000)}
+              >
+                Recurrence
+              </Animated.Text>
+            </Animated.View>
+            <Animated.Text 
+              style={styles.infoCardValue}
+              entering={FadeIn.delay(1050)}
+            >
               {date.type === 'yearly' ? 'Annual' : date.type === 'monthly' ? 'Monthly' : 'One-time'}
-            </Text>
-          </View>
-        </View>
+            </Animated.Text>
+          </Animated.View>
+        </Animated.View>
 
         {/* Timeline Section */}
         {date.type !== 'one-time' && (
-          <View style={styles.timelineSection}>
-            <Text style={styles.sectionTitle}>Timeline</Text>
-            <View style={styles.timelineCard}>
-              <View style={styles.timelineItem}>
-                <View style={styles.timelineDot} />
-                <View style={styles.timelineContent}>
+          <Animated.View 
+            style={styles.timelineSection}
+            entering={FadeInUp.delay(900).duration(600)}
+          >
+            <Animated.Text 
+              style={styles.sectionTitle}
+              entering={SlideInLeft.delay(1000).duration(400)}
+            >
+              Timeline
+            </Animated.Text>
+            <Animated.View 
+              style={styles.timelineCard}
+              entering={FadeIn.delay(1100).duration(500)}
+            >
+              <Animated.View 
+                style={styles.timelineItem}
+                entering={SlideInLeft.delay(1200).duration(400)}
+              >
+                <Animated.View 
+                  style={styles.timelineDot}
+                  entering={ZoomIn.delay(1300)}
+                />
+                <Animated.View 
+                  style={styles.timelineContent}
+                  entering={FadeIn.delay(1350)}
+                >
                   <Text style={styles.timelineTitle}>Original Event</Text>
                   <Text style={styles.timelineDate}>{formatDate(new Date(date.date))}</Text>
-                </View>
-              </View>
+                </Animated.View>
+              </Animated.View>
               
-              <View style={styles.timelineLine} />
+              <Animated.View 
+                style={styles.timelineLine}
+                entering={FadeIn.delay(1400).duration(300)}
+              />
               
-              <View style={styles.timelineItem}>
-                <View style={[styles.timelineDot, styles.timelineDotActive]} />
-                <View style={styles.timelineContent}>
+              <Animated.View 
+                style={styles.timelineItem}
+                entering={SlideInLeft.delay(1450).duration(400)}
+              >
+                <Animated.View 
+                  style={[styles.timelineDot, styles.timelineDotActive]}
+                  entering={BounceIn.delay(1500)}
+                />
+                <Animated.View 
+                  style={styles.timelineContent}
+                  entering={FadeIn.delay(1550)}
+                >
                   <Text style={styles.timelineTitle}>Next Occurrence</Text>
                   <Text style={styles.timelineDate}>{formatDate(nextOccurrence)}</Text>
-                </View>
-              </View>
-            </View>
-          </View>
+                </Animated.View>
+              </Animated.View>
+            </Animated.View>
+          </Animated.View>
         )}
 
         {/* Statistics Section */}
         {date.type === 'yearly' && (
-          <View style={styles.statsSection}>
-            <Text style={styles.sectionTitle}>Statistics</Text>
-            <View style={styles.statsCard}>
-            <View style={styles.infoRow}>
-                <Text style={styles.statsLabel}>Years Celebrated</Text>
-                <Text style={styles.statsValue}>{getYearsDuration(new Date(date.date))}</Text>
-              </View>
-              <View style={styles.infoRow}>
-                <Text style={styles.statsLabel}>Days Since First</Text>
-                <Text style={styles.statsValue}>
+          <Animated.View 
+            style={styles.statsSection}
+            entering={FadeInUp.delay(1000).duration(600)}
+          >
+            <Animated.Text 
+              style={styles.sectionTitle}
+              entering={SlideInLeft.delay(1100).duration(400)}
+            >
+              Statistics
+            </Animated.Text>
+            <Animated.View 
+              style={styles.statsCard}
+              entering={FadeIn.delay(1200).duration(500)}
+            >
+              <Animated.View 
+                style={styles.infoRow}
+                entering={SlideInLeft.delay(1300).duration(400)}
+              >
+                <Animated.Text 
+                  style={styles.statsLabel}
+                  entering={FadeIn.delay(1350)}
+                >
+                  Years Celebrated
+                </Animated.Text>
+                <Animated.Text 
+                  style={styles.statsValue}
+                  entering={BounceIn.delay(1400)}
+                >
+                  {getYearsDuration(new Date(date.date))}
+                </Animated.Text>
+              </Animated.View>
+              <Animated.View 
+                style={styles.infoRow}
+                entering={SlideInLeft.delay(1350).duration(400)}
+              >
+                <Animated.Text 
+                  style={styles.statsLabel}
+                  entering={FadeIn.delay(1400)}
+                >
+                  Days Since First
+                </Animated.Text>
+                <Animated.Text 
+                  style={styles.statsValue}
+                  entering={BounceIn.delay(1450)}
+                >
                   {Math.floor((new Date().getTime() - new Date(date.date).getTime()) / (1000 * 60 * 60 * 24))}
-                </Text>
-              </View>
-            </View>
-          </View>
+                </Animated.Text>
+              </Animated.View>
+            </Animated.View>
+          </Animated.View>
         )}
         
         {/* Bottom Spacing */}
         <View style={styles.bottomSpacing} />
-      </ScrollView>
+      </AnimatedScrollView>
     </View>
   );
 }
