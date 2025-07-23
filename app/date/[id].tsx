@@ -2,7 +2,7 @@ import React from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, ScrollView, Alert, Platform } from 'react-native';
 import { useLocalSearchParams, router, Stack } from 'expo-router';
 import { useDates } from '@/contexts/DateContext';
-import { formatDate, getDaysUntil, getNextOccurrence } from '@/utils/dateUtils';
+import { formatDate, getDaysUntil, getNextOccurrence, getYearsDuration } from '@/utils/dateUtils';
 import { Calendar, Clock, RotateCcw, Trash2, ArrowLeft, Cake } from '@/constant/icons';
 import { DateType } from '@/contexts/DateContext';
 
@@ -56,21 +56,6 @@ export default function DateDetailScreen() {
     if (isToday) return '#f59e0b';
     if (isUpcoming) return '#3b82f6';
     return '#6b7280';
-  };
-
-  const getYearsDuration = (originalDate: Date): string => {
-    const now = new Date();
-    let years = now.getFullYear() - originalDate.getFullYear();
-    
-    if (
-      now.getMonth() < originalDate.getMonth() || 
-      (now.getMonth() === originalDate.getMonth() && now.getDate() < originalDate.getDate())
-    ) {
-      years--;
-    }
-    const durations = Math.max(0, years);
-    
-    return `${durations} year${durations !== 1 ? 's' : ''}`;
   };
 
   const handleDelete = () => {

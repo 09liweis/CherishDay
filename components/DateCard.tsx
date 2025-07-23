@@ -3,7 +3,7 @@ import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
 import { router } from 'expo-router';
 import { Calendar, Clock, RotateCcw, Trash2, Cake } from '@/constant/icons';
 import { TrackedDate, DateType } from '@/contexts/DateContext';
-import { formatDate, getDaysUntil, getNextOccurrence } from '@/utils/dateUtils';
+import { formatDate, getDaysUntil, getNextOccurrence, getYearsDuration } from '@/utils/dateUtils';
 
 interface DateCardProps {
   date: TrackedDate;
@@ -103,22 +103,6 @@ export function DateCard({ date, onDelete }: DateCardProps) {
       </View>
     </TouchableOpacity>
   );
-}
-
-function getYearsDuration(originalDate: Date): string {
-  const now = new Date();
-  let years = now.getFullYear() - originalDate.getFullYear();
-  
-  // 如果今年的纪念日还没到，则减去1年
-  if (
-    now.getMonth() < originalDate.getMonth() || 
-    (now.getMonth() === originalDate.getMonth() && now.getDate() < originalDate.getDate())
-  ) {
-    years--;
-  }
-  const durations = Math.max(0, years);
-  
-  return `${durations} year${durations > 1 ? 's': ''}`;
 }
 
 const styles = StyleSheet.create({
