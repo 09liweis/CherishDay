@@ -1,10 +1,12 @@
 import React from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, ScrollView, Alert, Platform } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, ScrollView, Alert, Platform, Dimensions } from 'react-native';
 import { useLocalSearchParams, router, Stack } from 'expo-router';
 import { useDates } from '@/contexts/DateContext';
 import { formatDate, getDaysUntil, getNextOccurrence, getYearsDuration } from '@/utils/dateUtils';
 import { Calendar, Clock, RotateCcw, Trash2, ArrowLeft, Cake } from '@/constant/icons';
 import { DateType } from '@/contexts/DateContext';
+
+const { width } = Dimensions.get('window');
 
 export default function DateDetailScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
@@ -100,86 +102,131 @@ export default function DateDetailScreen() {
       </View>
 
       <ScrollView style={styles.content} showsVerticalScrollIndicator={false}>
-        {/* Main Card */}
-        <View style={styles.mainCard}>
-          <View style={styles.titleSection}>
-            <Text style={styles.title}>{date.title}</Text>
-            <View style={styles.typeRow}>
-              {getTypeIcon(date.type)}
-              <Text style={styles.typeText}>
-                {date.type.charAt(0).toUpperCase() + date.type.slice(1).replace('-', ' ')}
-              </Text>
+        {/* Hero Section */}
+        <View style={styles.heroSection}>
+          <View style={styles.heroBackground}>
+            <View style={styles.heroContent}>
+              <Text style={styles.heroTitle}>{date.title}</Text>
+              <View style={styles.heroDateContainer}>
+                <Text style={styles.heroDate}>{formatDate(nextOccurrence)}</Text>
+                <View style={styles.heroTypeTag}>
+                  {getTypeIcon(date.type)}
+                  <Text style={styles.heroTypeText}>
+                    {date.type.charAt(0).toUpperCase() + date.type.slice(1).replace('-', ' ')}
+                  </Text>
+                </View>
+              </View>
             </View>
           </View>
-
-          <View style={styles.statusSection}>
-            <View style={[styles.statusBadge, { backgroundColor: getStatusColor() + '20' }]}>
-              <Text style={[styles.statusText, { color: getStatusColor() }]}>
-                {getStatusText()}
-              </Text>
-            </View>
-          </View>
-        </View>
-
-        {/* Date Information */}
-        <View style={styles.infoCard}>
-          <Text style={styles.sectionTitle}>Date Information</Text>
           
-          <View style={styles.infoRow}>
-            <Text style={styles.infoLabel}>Original Date</Text>
-            <Text style={styles.infoValue}>
-              {formatDate(new Date(date.date))}
-            </Text>
-          </View>
-
-          <View style={styles.infoRow}>
-            <Text style={styles.infoLabel}>Next Occurrence</Text>
-            <Text style={styles.infoValue}>
-              {formatDate(nextOccurrence)}
-            </Text>
-          </View>
-
-          <View style={styles.infoRow}>
-            <Text style={styles.infoLabel}>Days Until</Text>
-            <Text style={[styles.infoValue, { color: getStatusColor(), fontWeight: '600' }]}>
+          {/* Countdown Circle */}
+          <View style={styles.countdownContainer}>
+            <View style={[styles.countdownCircle, { borderColor: getStatusColor() }]}>
+              <Text style={[styles.countdownNumber, { color: getStatusColor() }]}>
+                {Math.abs(daysUntil)}
+              </Text>
+              <Text style={[styles.countdownLabel, { color: getStatusColor() }]}>
+                {isOverdue ? 'OVERDUE' : isToday ? 'TODAY' : 'DAYS'}
+              </Text>
+            </View>
+            <Text style={[styles.countdownStatus, { color: getStatusColor() }]}>
               {getStatusText()}
             </Text>
           </View>
-
-          {date.type === 'yearly' && (
-            <View style={styles.infoRow}>
-              <Text style={styles.infoLabel}>Duration</Text>
-              <View style={styles.durationContainer}>
-                <Cake size={16} color="#6b7280" />
-                <Text style={styles.infoValue}>
-                  {getYearsDuration(new Date(date.date))}
-                </Text>
-              </View>
-            </View>
-          )}
         </View>
 
-        {/* Recurrence Information */}
-        {date.type !== 'one-time' && (
+        {/* Info Cards Grid */}
+        <View style={styles.infoGrid}>
           <View style={styles.infoCard}>
-            <Text style={styles.sectionTitle}>Recurrence</Text>
-            
-            <View style={styles.recurrenceInfo}>
-              {getTypeIcon(date.type)}
-              <View style={styles.recurrenceText}>
-                <Text style={styles.recurrenceTitle}>
-                  {date.type === 'yearly' ? 'Annual Recurrence' : 'Monthly Recurrence'}
-                </Text>
-                <Text style={styles.recurrenceDescription}>
-                  {date.type === 'yearly' 
-                    ? 'This date repeats every year on the same day'
-                    : 'This date repeats every month on the same day'
-                  }
+            <View style={styles.infoCardHeader}>
+              <Calendar size={20} color="#3b82f6" />
+              <Text style={styles.infoCardTitle}>Original Date</Text>
+            </View>
+            <Text style={styles.infoCardValue}>
+              {formatDate(new Date(date.date))}
+            </Text>
+          </View>
+          
+          <View style={styles.infoCard}>
+            <View style={styles.infoCardHeader}>
+              <Clock size={20} color="#10b981" />
+              <Text style={styles.infoCardTitle}>Next Event</Text>
+            </View>
+            <Text style={styles.infoCardValue}>
+              {formatDate(nextOccurrence)}
+            </Text>
+          </View>
+          
+          {date.type === 'yearly' && (
+            <View style={styles.infoCard}>
+              <View style={styles.infoCardHeader}>
+                <Cake size={20} color="#f59e0b" />
+                <Text style={styles.infoCardTitle}>Duration</Text>
+              </View>
+              <Text style={styles.infoCardValue}>
+                {getYearsDuration(new Date(date.date))}
+              </Text>
+            </View>
+          )}
+          
+          <View style={styles.infoCard}>
+            <View style={styles.infoCardHeader}>
+              <RotateCcw size={20} color="#8b5cf6" />
+              <Text style={styles.infoCardTitle}>Recurrence</Text>
+            </View>
+            <Text style={styles.infoCardValue}>
+              {date.type === 'yearly' ? 'Annual' : date.type === 'monthly' ? 'Monthly' : 'One-time'}
+            </Text>
+          </View>
+        </View>
+
+        {/* Timeline Section */}
+        {date.type !== 'one-time' && (
+          <View style={styles.timelineSection}>
+            <Text style={styles.sectionTitle}>Timeline</Text>
+            <View style={styles.timelineCard}>
+              <View style={styles.timelineItem}>
+                <View style={styles.timelineDot} />
+                <View style={styles.timelineContent}>
+                  <Text style={styles.timelineTitle}>Original Event</Text>
+                  <Text style={styles.timelineDate}>{formatDate(new Date(date.date))}</Text>
+                </View>
+              </View>
+              
+              <View style={styles.timelineLine} />
+              
+              <View style={styles.timelineItem}>
+                <View style={[styles.timelineDot, styles.timelineDotActive]} />
+                <View style={styles.timelineContent}>
+                  <Text style={styles.timelineTitle}>Next Occurrence</Text>
+                  <Text style={styles.timelineDate}>{formatDate(nextOccurrence)}</Text>
+                </View>
+              </View>
+            </View>
+          </View>
+        )}
+
+        {/* Statistics Section */}
+        {date.type === 'yearly' && (
+          <View style={styles.statsSection}>
+            <Text style={styles.sectionTitle}>Statistics</Text>
+            <View style={styles.statsCard}>
+            <View style={styles.infoRow}>
+                <Text style={styles.statsLabel}>Years Celebrated</Text>
+                <Text style={styles.statsValue}>{getYearsDuration(new Date(date.date))}</Text>
+              </View>
+              <View style={styles.infoRow}>
+                <Text style={styles.statsLabel}>Days Since First</Text>
+                <Text style={styles.statsValue}>
+                  {Math.floor((new Date().getTime() - new Date(date.date).getTime()) / (1000 * 60 * 60 * 24))}
                 </Text>
               </View>
             </View>
           </View>
         )}
+        
+        {/* Bottom Spacing */}
+        <View style={styles.bottomSpacing} />
       </ScrollView>
     </View>
   );
@@ -188,7 +235,7 @@ export default function DateDetailScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#f8fafc',
+    backgroundColor: '#f5f7fa',
   },
   header: {
     flexDirection: 'row',
@@ -198,8 +245,11 @@ const styles = StyleSheet.create({
     paddingTop: 60,
     paddingBottom: 16,
     backgroundColor: '#ffffff',
-    borderBottomWidth: 1,
-    borderBottomColor: '#e2e8f0',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.05,
+    shadowRadius: 8,
+    elevation: 3,
   },
   headerButton: {
     width: 40,
@@ -207,7 +257,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     borderRadius: 20,
-    backgroundColor: '#f1f5f9',
+    backgroundColor: '#f8fafc',
   },
   headerTitle: {
     fontSize: 18,
@@ -216,69 +266,190 @@ const styles = StyleSheet.create({
   },
   content: {
     flex: 1,
-    padding: 24,
   },
-  mainCard: {
+  heroSection: {
     backgroundColor: '#ffffff',
+    paddingTop: 32,
+    paddingBottom: 40,
+    marginBottom: 24,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.05,
+    shadowRadius: 8,
+    elevation: 3,
+  },
+  heroBackground: {
+    paddingHorizontal: 24,
+    marginBottom: 32,
+  },
+  heroContent: {
+    alignItems: 'center',
+  },
+  heroTitle: {
+    fontSize: 32,
+    fontWeight: '700',
+    color: '#0f172a',
+    textAlign: 'center',
+    marginBottom: 16,
+    lineHeight: 40,
+  },
+  heroDateContainer: {
+    alignItems: 'center',
+  },
+  heroDate: {
+    fontSize: 18,
+    color: '#64748b',
+    marginBottom: 12,
+    textAlign: 'center',
+  },
+  heroTypeTag: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#f1f5f9',
+    paddingHorizontal: 16,
+    paddingVertical: 8,
     borderRadius: 20,
-    padding: 24,
+  },
+  heroTypeText: {
+    fontSize: 14,
+    color: '#3b82f6',
+    marginLeft: 6,
+    fontWeight: '600',
+  },
+  countdownContainer: {
+    alignItems: 'center',
+  },
+  countdownCircle: {
+    width: 120,
+    height: 120,
+    borderRadius: 60,
+    borderWidth: 4,
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: '#ffffff',
     marginBottom: 16,
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.08,
+    shadowOpacity: 0.1,
     shadowRadius: 12,
     elevation: 4,
   },
-  titleSection: {
-    marginBottom: 20,
-  },
-  title: {
-    fontSize: 28,
+  countdownNumber: {
+    fontSize: 36,
     fontWeight: '700',
-    color: '#0f172a',
-    lineHeight: 36,
-    marginBottom: 12,
   },
-  typeRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
+  countdownLabel: {
+    fontSize: 12,
+    fontWeight: '600',
+    letterSpacing: 1,
   },
-  typeText: {
-    fontSize: 16,
-    color: '#3b82f6',
-    marginLeft: 8,
+  countdownStatus: {
+    fontSize: 18,
     fontWeight: '600',
   },
-  statusSection: {
-    alignItems: 'center',
-  },
-  statusBadge: {
-    paddingHorizontal: 20,
-    paddingVertical: 12,
-    borderRadius: 25,
-    minWidth: 120,
-  },
-  statusText: {
-    fontSize: 16,
-    fontWeight: '700',
-    textAlign: 'center',
+  infoGrid: {
+    paddingHorizontal: 24,
+    marginBottom: 24,
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: 12,
   },
   infoCard: {
     backgroundColor: '#ffffff',
     borderRadius: 16,
-    padding: 20,
-    marginBottom: 16,
+    padding: 16,
+    flex: 1,
+    minWidth: (width - 60) / 2,
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.04,
+    shadowOpacity: 0.05,
     shadowRadius: 8,
-    elevation: 2,
+    elevation: 3,
   },
-  sectionTitle: {
-    fontSize: 18,
+  infoCardHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 12,
+  },
+  infoCardTitle: {
+    fontSize: 14,
+    fontWeight: '600',
+    color: '#64748b',
+    marginLeft: 8,
+  },
+  infoCardValue: {
+    fontSize: 16,
     fontWeight: '600',
     color: '#0f172a',
-    marginBottom: 16,
+    lineHeight: 22,
+  },
+  timelineSection: {
+    paddingHorizontal: 24,
+    marginBottom: 24,
+  },
+  sectionTitle: {
+    fontSize: 20,
+    fontWeight: '600',
+    color: '#0f172a',
+    marginBottom: 20,
+  },
+  timelineCard: {
+    backgroundColor: '#ffffff',
+    borderRadius: 16,
+    padding: 20,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.05,
+    shadowRadius: 8,
+    elevation: 3,
+  },
+  timelineItem: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  timelineDot: {
+    width: 12,
+    height: 12,
+    borderRadius: 6,
+    backgroundColor: '#e2e8f0',
+    marginRight: 16,
+  },
+  timelineDotActive: {
+    backgroundColor: '#3b82f6',
+  },
+  timelineLine: {
+    width: 2,
+    height: 24,
+    backgroundColor: '#e2e8f0',
+    marginLeft: 5,
+    marginVertical: 8,
+  },
+  timelineContent: {
+    flex: 1,
+  },
+  timelineTitle: {
+    fontSize: 16,
+    fontWeight: '600',
+    color: '#0f172a',
+    marginBottom: 4,
+  },
+  timelineDate: {
+    fontSize: 14,
+    color: '#64748b',
+  },
+  statsSection: {
+    paddingHorizontal: 24,
+    marginBottom: 24,
+  },
+  statsCard: {
+    backgroundColor: '#ffffff',
+    borderRadius: 16,
+    padding: 20,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.05,
+    shadowRadius: 8,
+    elevation: 3,
   },
   infoRow: {
     flexDirection: 'row',
@@ -286,48 +457,20 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     paddingVertical: 12,
     borderBottomWidth: 1,
-    borderBottomColor: '#f1f5f9',
+    borderBottomColor: '#f8fafc',
   },
-  infoLabel: {
+  statsLabel: {
     fontSize: 14,
     color: '#64748b',
     fontWeight: '500',
-    flex: 1,
   },
-  infoValue: {
-    fontSize: 14,
-    color: '#0f172a',
-    fontWeight: '500',
-    flex: 2,
-    textAlign: 'right',
-  },
-  durationContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'flex-end',
-    flex: 2,
-  },
-  recurrenceInfo: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    padding: 16,
-    backgroundColor: '#eff6ff',
-    borderRadius: 12,
-  },
-  recurrenceText: {
-    marginLeft: 12,
-    flex: 1,
-  },
-  recurrenceTitle: {
+  statsValue: {
     fontSize: 16,
     fontWeight: '600',
-    color: '#1d4ed8',
-    marginBottom: 4,
+    color: '#0f172a',
   },
-  recurrenceDescription: {
-    fontSize: 14,
-    color: '#3b82f6',
-    lineHeight: 20,
+  bottomSpacing: {
+    height: 40,
   },
   notFoundContainer: {
     flex: 1,
@@ -349,5 +492,5 @@ const styles = StyleSheet.create({
   backButtonText: {
     color: '#ffffff',
     fontWeight: '600',
-  },
+  }
 });
