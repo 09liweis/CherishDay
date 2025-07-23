@@ -12,10 +12,11 @@ import {
   Dimensions
 } from 'react-native';
 import { Calendar, Plus, AlertCircle, LayoutGrid, List } from '@/constant/icons';
-import { useDates, DateType } from '@/contexts/DateContext';
+import { useDates } from '@/contexts/DateContext';
 import { DateList } from '@/components/DateList';
 import { AddDateModal } from '@/components/AddDateModal';
 import { APP_NAME } from '@/constant/text';
+import { DateType } from '@/types/date';
 
 const { width } = Dimensions.get('window');
 

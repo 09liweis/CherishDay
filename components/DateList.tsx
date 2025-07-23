@@ -1,8 +1,9 @@
 import React from 'react';
 import { View, Alert, StyleSheet, Platform, Dimensions } from 'react-native';
-import { useDates, TrackedDate } from '@/contexts/DateContext';
+import { useDates } from '@/contexts/DateContext';
 import { DateCard } from './DateCard';
 import { getNextOccurrence } from '@/utils/dateUtils';
+import { TrackedDate } from '@/types/date';
 
 const { width } = Dimensions.get('window');
 

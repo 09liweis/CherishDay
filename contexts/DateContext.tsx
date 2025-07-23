@@ -4,20 +4,12 @@ import { useEffect } from 'react';
 import { Databases, ID, Query } from 'react-native-appwrite';
 import { client } from '../constant/appwrite';
 import { useAuth } from './AuthContext';
+import { DateType, TrackedDate } from '@/types/date';
 
 // Appwrite 数据库配置
 const databases = new Databases(client);
 const DATABASE_ID = process.env.EXPO_PUBLIC_APPWRITE_DATABASE_ID; // 替换为你的数据库 ID
 const COLLECTION_ID = process.env.EXPO_PUBLIC_APPWRITE_COLLECTION_ID; // 替换为你的集合 ID
-
-export type DateType = 'yearly' | 'monthly' | 'one-time';
-
-export interface TrackedDate {
-  id: string;
-  title: string;
-  date: string;
-  type: DateType;
-}
 
 interface DateContextType {
   dates: TrackedDate[];

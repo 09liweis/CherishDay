@@ -2,8 +2,8 @@ import React from 'react';
 import { View, Text, TouchableOpacity, StyleSheet, Dimensions } from 'react-native';
 import { router } from 'expo-router';
 import { Calendar, Clock, RotateCcw, Trash2, Cake } from '@/constant/icons';
-import { TrackedDate, DateType } from '@/contexts/DateContext';
 import { formatDate, getDaysUntil, getNextOccurrence, getYearsDuration } from '@/utils/dateUtils';
+import { DateType, TrackedDate } from '@/types/date';
 
 const { width } = Dimensions.get('window');
 
