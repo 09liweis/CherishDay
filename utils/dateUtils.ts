@@ -57,3 +57,19 @@ export function formatDate(date: Date): string {
     timeZone: 'UTC'
   });
 }
+
+export function getYearsDuration(originalDate: Date): string {
+  const now = new Date();
+  let years = now.getFullYear() - originalDate.getFullYear();
+  
+  // 如果今年的纪念日还没到，则减去1年
+  if (
+    now.getMonth() < originalDate.getMonth() || 
+    (now.getMonth() === originalDate.getMonth() && now.getDate() < originalDate.getDate())
+  ) {
+    years--;
+  }
+  const durations = Math.max(0, years);
+  
+  return `${durations} year${durations > 1 ? 's': ''}`;
+}
