@@ -1,6 +1,6 @@
 import { APP_NAME } from '@/constant/text';
 import { Tabs } from 'expo-router';
-import { Calendar, User } from '@/constant/icons';
+import { Calendar, User, Users } from '@/constant/icons';
 
 export default function TabLayout() {
   return (
@@ -28,6 +28,15 @@ export default function TabLayout() {
           title: APP_NAME,
           tabBarIcon: ({ size, color }) => (
             <Calendar size={size} color={color} />
+          ),
+        }}
+      />
+      <Tabs.Screen
+        name="friends"
+        options={{
+          title: "Friends",
+          tabBarIcon: ({ size, color }) => (
+            <Users size={size} color={color} />
           ),
         }}
       />
