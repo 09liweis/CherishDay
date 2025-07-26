@@ -51,7 +51,11 @@ const getRedirectURL = () => {
 // 用户认证相关函数
 export const appwriteAuth = {
   // 使用Google登录
-  loginWithGoogle: async () => {
+  loginWithOauth: async (provider:string) => {
+    const OAUTH_PROVIDERS:{[key:string]:OAuthProvider} = {
+      google: OAuthProvider.Google,
+      github: OAuthProvider.Github
+    }
     try {
       // 创建深度链接，在所有Expo环境中都能工作
       // 确保使用localhost作为主机名，以避免成功/失败URL的验证错误
@@ -60,7 +64,7 @@ export const appwriteAuth = {
       
       // 开始OAuth流程
       const loginUrl = await account.createOAuth2Token(
-        OAuthProvider.Google,
+        OAUTH_PROVIDERS[provider],
         `${deepLink}`,
         `${deepLink}`
       );
@@ -88,47 +92,6 @@ export const appwriteAuth = {
       }
     } catch (error) {
       console.error('Google登录失败:', error);
-      throw error;
-    }
-  },
-  
-  // 使用GitHub登录
-  loginWithGithub: async () => {
-    try {
-      // 创建深度链接，在所有Expo环境中都能工作
-      const deepLink = new URL(makeRedirectUri({ preferLocalhost: true }));
-      const scheme = `${deepLink.protocol}//`; // 例如 'exp://' 或 'appwrite-callback-<PROJECT_ID>://'
-      
-      // 开始OAuth流程
-      const loginUrl = await account.createOAuth2Token(
-        OAuthProvider.Github,
-        `${deepLink}`,
-        `${deepLink}`
-      );
-      
-      // 打开loginUrl并监听scheme重定向
-      const result = await WebBrowser.openAuthSessionAsync(`${loginUrl}`, scheme);
-      
-      if (result.type === 'success') {
-        // 从OAuth重定向URL中提取凭据
-        const url = new URL(result.url);
-        const secret = url.searchParams.get('secret');
-        const userId = url.searchParams.get('userId');
-        
-        if (secret && userId) {
-          // 使用OAuth凭据创建会话
-          await account.createSession(userId, secret);
-          
-          // 获取当前用户信息
-          return await appwriteAuth.getCurrentUser();
-        } else {
-          throw new Error('未能从重定向URL中获取凭据');
-        }
-      } else {
-        throw new Error('用户取消了登录');
-      }
-    } catch (error) {
-      console.error('GitHub登录失败:', error);
       throw error;
     }
   },

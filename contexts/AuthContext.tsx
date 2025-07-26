@@ -78,7 +78,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     try {
       setIsLoading(true);
       setError(null);
-      const currentUser = await appwriteAuth.loginWithGoogle();
+      const currentUser = await appwriteAuth.loginWithOauth('google');
       // 确保currentUser不为null才设置用户
       if (currentUser) {
         setUser(currentUser);
@@ -102,7 +102,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     try {
       setIsLoading(true);
       setError(null);
-      const currentUser = await appwriteAuth.loginWithGithub();
+      const currentUser = await appwriteAuth.loginWithOauth('github');
       // 确保currentUser不为null才设置用户
       if (currentUser) {
         setUser(currentUser);
