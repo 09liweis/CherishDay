@@ -46,17 +46,19 @@ export function TypeSelector({ selectedType, onTypeChange }: TypeSelectorProps) 
             ]}
           >
             <View style={styles.optionContent}>
-              <Icon 
-                size={20} 
-                color={isSelected ? '#3b82f6' : '#64748b'} 
-              />
               <View style={styles.optionText}>
-                <Text style={[
-                  styles.optionLabel,
-                  isSelected ? styles.selectedLabel : styles.unselectedLabel
-                ]}>
-                  {option.label}
-                </Text>
+                <View style={{flexDirection:'row',gap: 4}}>
+                  <Icon 
+                    size={20} 
+                    color={isSelected ? '#3b82f6' : '#64748b'} 
+                  />
+                  <Text style={[
+                    styles.optionLabel,
+                    isSelected ? styles.selectedLabel : styles.unselectedLabel
+                  ]}>
+                    {option.label}
+                  </Text>
+                </View>
                 <Text style={[
                   styles.optionDescription,
                   isSelected ? styles.selectedDescription : styles.unselectedDescription
@@ -80,11 +82,13 @@ export function TypeSelector({ selectedType, onTypeChange }: TypeSelectorProps) 
 const styles = StyleSheet.create({
   container: {
     gap: 8,
+    flexDirection: 'row'
   },
   option: {
+    flex: 1,
     borderWidth: 1,
     borderRadius: 8,
-    padding: 16,
+    padding: 10,
   },
   selectedOption: {
     borderColor: '#3b82f6',
@@ -97,9 +101,9 @@ const styles = StyleSheet.create({
   optionContent: {
     flexDirection: 'row',
     alignItems: 'center',
+    position: 'relative'
   },
   optionText: {
-    marginLeft: 12,
     flex: 1,
   },
   optionLabel: {
@@ -123,6 +127,9 @@ const styles = StyleSheet.create({
     color: '#64748b',
   },
   selectedIndicator: {
+    position: 'absolute',
+    top: 0,
+    right: 0,
     width: 24,
     height: 24,
     borderRadius: 12,
