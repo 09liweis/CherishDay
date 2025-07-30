@@ -242,6 +242,7 @@ const styles = StyleSheet.create({
     fontWeight: '500',
   },
   headerContent: {
+    paddingTop: 60,
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
