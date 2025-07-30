@@ -1,7 +1,7 @@
 import React from 'react';
 import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
 import { Calendar, Clock, RotateCcw } from 'lucide-react-native';
-import { DateType } from '@/contexts/DateContext';
+import { DateType } from '@/types/date';
 
 interface TypeSelectorProps {
   selectedType: DateType;
@@ -45,28 +45,24 @@ export function TypeSelector({ selectedType, onTypeChange }: TypeSelectorProps) 
               isSelected ? styles.selectedOption : styles.unselectedOption
             ]}
           >
-            <View style={styles.optionContent}>
-              <View style={styles.optionText}>
-                <View style={{flexDirection:'row',gap: 4}}>
-                  <Icon 
-                    size={20} 
-                    color={isSelected ? '#3b82f6' : '#64748b'} 
-                  />
-                  <Text style={[
-                    styles.optionLabel,
-                    isSelected ? styles.selectedLabel : styles.unselectedLabel
-                  ]}>
-                    {option.label}
-                  </Text>
-                </View>
-                <Text style={[
-                  styles.optionDescription,
-                  isSelected ? styles.selectedDescription : styles.unselectedDescription
-                ]}>
-                  {option.description}
-                </Text>
-              </View>
+            <View style={{flexDirection:'row',gap: 8, alignItems:'center'}}>
+              <Icon 
+                size={20} 
+                color={isSelected ? '#3b82f6' : '#64748b'} 
+              />
+              <Text style={[
+                styles.optionLabel,
+                isSelected ? styles.selectedLabel : styles.unselectedLabel
+              ]}>
+                {option.label}
+              </Text>
             </View>
+            <Text style={[
+              styles.optionDescription,
+              isSelected ? styles.selectedDescription : styles.unselectedDescription
+            ]}>
+              {option.description}
+            </Text>
           </TouchableOpacity>
         );
       })}
@@ -92,14 +88,6 @@ const styles = StyleSheet.create({
   unselectedOption: {
     borderColor: '#d1d5db',
     backgroundColor: '#ffffff',
-  },
-  optionContent: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    position: 'relative'
-  },
-  optionText: {
-    flex: 1,
   },
   optionLabel: {
     fontWeight: '600',
