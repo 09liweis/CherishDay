@@ -66,11 +66,6 @@ export function TypeSelector({ selectedType, onTypeChange }: TypeSelectorProps) 
                   {option.description}
                 </Text>
               </View>
-              {isSelected && (
-                <View style={styles.selectedIndicator}>
-                  <View style={styles.selectedDot} />
-                </View>
-              )}
             </View>
           </TouchableOpacity>
         );
@@ -125,22 +120,5 @@ const styles = StyleSheet.create({
   },
   unselectedDescription: {
     color: '#64748b',
-  },
-  selectedIndicator: {
-    position: 'absolute',
-    top: 0,
-    right: 0,
-    width: 24,
-    height: 24,
-    borderRadius: 12,
-    backgroundColor: '#3b82f6',
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  selectedDot: {
-    width: 8,
-    height: 8,
-    borderRadius: 4,
-    backgroundColor: '#ffffff',
-  },
+  }
 });
