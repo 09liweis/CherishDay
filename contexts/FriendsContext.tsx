@@ -6,29 +6,18 @@ import { useAuth } from './AuthContext';
 // Appwrite 数据库配置
 const databases = new Databases(client);
 const DATABASE_ID = process.env.EXPO_PUBLIC_APPWRITE_DATABASE_ID;
-const FRIENDS_COLLECTION_ID = process.env.EXPO_PUBLIC_APPWRITE_FRIENDS_COLLECTION_ID || 'friends';
-const FRIEND_REQUESTS_COLLECTION_ID = process.env.EXPO_PUBLIC_APPWRITE_FRIEND_REQUESTS_COLLECTION_ID || 'friend_requests';
+const RELATIONSHIPS_COLLECTION_ID = process.env.EXPO_PUBLIC_APPWRITE_RELATIONSHIPS_COLLECTION_ID || 'relationships';
 
-interface Friend {
+interface Relationship {
   $id: string;
-  name: string;
-  email: string;
-  $createdAt: string;
-}
-
-interface FriendRequest {
-  $id: string;
-  fromUserId: string;
-  toUserId: string;
+  userId: string;
+  friendId: string;
   status: 'pending' | 'accepted' | 'rejected';
-  fromUser?: Friend;
-  toUser?: Friend;
   $createdAt: string;
 }
 
 interface FriendsContextType {
-  friends: Friend[];
-  friendRequests: FriendRequest[];
+  relationships: Relationship[];
   searchUsers: (email: string) => Promise<any[]>;
   sendFriendRequest: (toUserId: string) => Promise<void>;
   acceptFriendRequest: (requestId: string) => Promise<void>;
@@ -41,20 +30,17 @@ interface FriendsContextType {
 const FriendsContext = createContext<FriendsContextType | undefined>(undefined);
 
 export function FriendsProvider({ children }: { children: ReactNode }) {
-  const [friends, setFriends] = useState<Friend[]>([]);
-  const [friendRequests, setFriendRequests] = useState<FriendRequest[]>([]);
+  const [relationships, setFriends] = useState<Relationship[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
   const { user } = useAuth();
 
-  // Load friends and friend requests when user changes
+  // Load relationships and friend requests when user changes
   useEffect(() => {
     if (user) {
       loadFriends();
-      loadFriendRequests();
     } else {
       setFriends([]);
-      setFriendRequests([]);
     }
   }, [user]);
 
@@ -65,81 +51,39 @@ export function FriendsProvider({ children }: { children: ReactNode }) {
     setError(null);
     
     try {
-      // This is a simplified approach - in a real app, you'd have a proper friends relationship table
-      // For now, we'll just load accepted friend requests to get friends
+      // This is a simplified approach - in a real app, you'd have a proper relationships relationship table
+      // For now, we'll just load accepted friend requests to get relationships
       const response = await databases.listDocuments(
         DATABASE_ID,
-        FRIEND_REQUESTS_COLLECTION_ID,
+        RELATIONSHIPS_COLLECTION_ID,
         [
           Query.equal('status', 'accepted'),
           Query.or([
-            Query.equal('fromUserId', user.$id),
-            Query.equal('toUserId', user.$id)
+            Query.equal('userId', user.$id),
+            Query.equal('friendId', user.$id)
           ])
         ]
       );
       
       // Extract friend user IDs and fetch their details
       const friendIds = response.documents.map(doc => 
-        doc.fromUserId === user.$id ? doc.toUserId : doc.fromUserId
+        doc.userId === user.$id ? doc.userId : doc.friendId
       );
       
       if (friendIds.length > 0) {
         // In a real implementation, you'd fetch user details from a users collection
         // For now, we'll simulate this with the friend request data
-        const friendsData = response.documents.map(doc => {
-          const isFromUser = doc.fromUserId === user.$id;
-          return {
-            $id: isFromUser ? doc.toUserId : doc.fromUserId,
-            name: isFromUser ? doc.toUserName || 'Unknown' : doc.fromUserName || 'Unknown',
-            email: isFromUser ? doc.toUserEmail || 'unknown@email.com' : doc.fromUserEmail || 'unknown@email.com',
-            $createdAt: doc.$createdAt,
-          };
-        });
         
-        setFriends(friendsData);
+        
+        setFriends(response.documents);
       } else {
         setFriends([]);
       }
     } catch (error) {
-      console.error('Failed to load friends:', error);
-      setError('Failed to load friends');
+      console.error('Failed to load relationships:', error);
+      setError('Failed to load relationships');
     } finally {
       setIsLoading(false);
-    }
-  };
-
-  const loadFriendRequests = async () => {
-    if (!user) return;
-    
-    try {
-      const response = await databases.listDocuments(
-        DATABASE_ID,
-        FRIEND_REQUESTS_COLLECTION_ID,
-        [
-          Query.equal('toUserId', user.$id),
-          Query.equal('status', 'pending')
-        ]
-      );
-      
-      const requestsWithUserData = response.documents.map(doc => ({
-        $id: doc.$id,
-        fromUserId: doc.fromUserId,
-        toUserId: doc.toUserId,
-        status: doc.status,
-        fromUser: {
-          $id: doc.fromUserId,
-          name: doc.fromUserName || 'Unknown',
-          email: doc.fromUserEmail || 'unknown@email.com',
-          $createdAt: doc.$createdAt,
-        },
-        $createdAt: doc.$createdAt,
-      }));
-      
-      setFriendRequests(requestsWithUserData);
-    } catch (error) {
-      console.error('Failed to load friend requests:', error);
-      setError('Failed to load friend requests');
     }
   };
 
@@ -153,6 +97,7 @@ export function FriendsProvider({ children }: { children: ReactNode }) {
       
       // Return empty array for now since we don't have access to search all users
       // In a real app, you'd implement this with a proper users collection and search functionality
+
       return [];
     } catch (error) {
       console.error('Failed to search users:', error);
@@ -166,13 +111,11 @@ export function FriendsProvider({ children }: { children: ReactNode }) {
     try {
       await databases.createDocument(
         DATABASE_ID,
-        FRIEND_REQUESTS_COLLECTION_ID,
+        RELATIONSHIPS_COLLECTION_ID,
         ID.unique(),
         {
-          fromUserId: user.$id,
-          fromUserName: user.name,
-          fromUserEmail: user.email,
-          toUserId: toUserId,
+          userId: user.$id,
+          friendId: toUserId,
           status: 'pending',
         }
       );
@@ -186,15 +129,15 @@ export function FriendsProvider({ children }: { children: ReactNode }) {
     try {
       await databases.updateDocument(
         DATABASE_ID,
-        FRIEND_REQUESTS_COLLECTION_ID,
+        RELATIONSHIPS_COLLECTION_ID,
         requestId,
         {
           status: 'accepted'
         }
       );
       
-      // Refresh both friends and requests
-      await Promise.all([loadFriends(), loadFriendRequests()]);
+      // Refresh both relationships and requests
+      await Promise.all([loadFriends()]);
     } catch (error) {
       console.error('Failed to accept friend request:', error);
       throw error;
@@ -205,7 +148,7 @@ export function FriendsProvider({ children }: { children: ReactNode }) {
     try {
       await databases.updateDocument(
         DATABASE_ID,
-        FRIEND_REQUESTS_COLLECTION_ID,
+        RELATIONSHIPS_COLLECTION_ID,
         requestId,
         {
           status: 'rejected'
@@ -213,7 +156,6 @@ export function FriendsProvider({ children }: { children: ReactNode }) {
       );
       
       // Refresh friend requests
-      await loadFriendRequests();
     } catch (error) {
       console.error('Failed to reject friend request:', error);
       throw error;
@@ -221,13 +163,12 @@ export function FriendsProvider({ children }: { children: ReactNode }) {
   };
 
   const refreshFriends = async () => {
-    await Promise.all([loadFriends(), loadFriendRequests()]);
+    await Promise.all([loadFriends()]);
   };
 
   return (
     <FriendsContext.Provider value={{
-      friends,
-      friendRequests,
+      relationships,
       searchUsers,
       sendFriendRequest,
       acceptFriendRequest,
