@@ -7,6 +7,7 @@ import { useAuth } from './AuthContext';
 const databases = new Databases(client);
 const DATABASE_ID = process.env.EXPO_PUBLIC_APPWRITE_DATABASE_ID;
 const RELATIONSHIPS_COLLECTION_ID = process.env.EXPO_PUBLIC_APPWRITE_RELATIONSHIPS_COLLECTION_ID || 'relationships';
+const USER_PROFILES_COLLECTION_ID = process.env.EXPO_PUBLIC_APPWRITE_USER_PROFILE_ID;
 
 interface Relationship {
   $id: string;
