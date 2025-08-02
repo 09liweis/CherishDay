@@ -19,8 +19,7 @@ import { User, Search, UserPlus, Users } from '@/constant/icons';
 const FriendsScreen = () => {
   const { user } = useAuth();
   const { 
-    friends, 
-    friendRequests, 
+    relationships, 
     searchUsers, 
     sendFriendRequest, 
     acceptFriendRequest, 
@@ -130,7 +129,7 @@ const FriendsScreen = () => {
       <View style={styles.header}>
         <Text style={styles.headerTitle}>Friends</Text>
         <Text style={styles.headerSubtitle}>
-          {friends.length} friend{friends.length !== 1 ? 's' : ''}
+          {relationships?.length} friend{relationships?.length !== 1 ? 's' : ''}
         </Text>
       </View>
 
@@ -206,12 +205,12 @@ const FriendsScreen = () => {
         </View>
 
         {/* Friend Requests Section */}
-        {friendRequests.length > 0 && (
+        {relationships?.length > 0 && (
           <View style={styles.section}>
             <Text style={styles.sectionTitle}>
-              Friend Requests ({friendRequests.length})
+              Friend Requests ({relationships?.length})
             </Text>
-            {friendRequests.map((request) => (
+            {relationships?.map((request) => (
               <View key={request.$id} style={styles.requestItem}>
                 <View style={styles.userInfo}>
                   <View style={styles.avatar}>
@@ -246,7 +245,7 @@ const FriendsScreen = () => {
         {/* Friends List Section */}
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>
-            My Friends ({friends.length})
+            My Friends ({relationships?.length})
           </Text>
           
           {isLoading && !refreshing ? (
@@ -254,7 +253,7 @@ const FriendsScreen = () => {
               <ActivityIndicator size="large" color="#3b82f6" />
               <Text style={styles.loadingText}>Loading friends...</Text>
             </View>
-          ) : friends.length === 0 ? (
+          ) : relationships?.length === 0 ? (
             <View style={styles.emptyState}>
               <View style={styles.emptyIcon}>
                 <Users size={32} color="#64748b" />
@@ -266,7 +265,7 @@ const FriendsScreen = () => {
             </View>
           ) : (
             <View style={styles.friendsList}>
-              {friends.map((friend) => (
+              {relationships?.map((friend) => (
                 <FriendCard key={friend.$id} friend={friend} />
               ))}
             </View>

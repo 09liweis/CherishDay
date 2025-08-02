@@ -7,7 +7,7 @@ import { useAuth } from './AuthContext';
 const databases = new Databases(client);
 const DATABASE_ID = process.env.EXPO_PUBLIC_APPWRITE_DATABASE_ID;
 const RELATIONSHIPS_COLLECTION_ID = process.env.EXPO_PUBLIC_APPWRITE_RELATIONSHIPS_COLLECTION_ID || 'relationships';
-const USER_PROFILES_COLLECTION_ID = process.env.EXPO_PUBLIC_APPWRITE_USER_PROFILE_ID;
+const USER_PROFILES_COLLECTION_ID = process.env.EXPO_PUBLIC_APPWRITE_USER_PROFILES_ID;
 
 interface Relationship {
   $id: string;
@@ -76,7 +76,7 @@ export function FriendsProvider({ children }: { children: ReactNode }) {
         // For now, we'll simulate this with the friend request data
         
         
-        setFriends(response.documents);
+        setFriends([]);
       } else {
         setFriends([]);
       }
@@ -92,12 +92,13 @@ export function FriendsProvider({ children }: { children: ReactNode }) {
     if (!user) throw new Error('User not authenticated');
     
     try {
-      // In a real implementation, you'd search a users collection
-      // For this demo, we'll simulate finding users by checking if they exist in the auth system
-      // This is a simplified approach - you'd typically have a dedicated users collection
-      
-      // Return empty array for now since we don't have access to search all users
-      // In a real app, you'd implement this with a proper users collection and search functionality
+      const response = await databases.listDocuments(
+        DATABASE_ID,
+        USER_PROFILES_COLLECTION_ID,
+        [
+          Query.equal('email', email),
+        ]
+      );
 
       return [];
     } catch (error) {
